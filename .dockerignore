@@ -1,0 +1,38 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Ignore environment directories and files
+env/
+venv/
+.venv/
+Pipfile
+Pipfile.lock
+
+# Ignore local development settings
+*.sqlite3
+*.log
+
+# Ignore VCS (version control system) files and folders
+.git/
+.gitignore
+.gitattributes
+
+# Ignore common editor / IDE configurations
+.vscode/
+.idea/
+
+# If you're collecting static files locally
+staticfiles/
+
+# Ignore coverage, test output, or any other logs
+.coverage
+.tox/
+*.coverage
+*.cover
+coverage.xml
+
+# Node modules (if using a frontend with npm/yarn)
+node_modules/

@@ -1,5 +1,5 @@
 # **PROJECT**:  
-**Lightweight Track Builder (Rewrite of Templot by Martin Wynne)**  
+**Lightweight Track Builder (Thank you to Martin Wynne, Templot provided the inspiration. I have used the data from chairs_unit.pas which exists in the database, the models have been shaped on the paremters defined by Martin in chairs_unit.pas)**  
 
 ---
 

@@ -1,0 +1,76 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  # Step 1: CI - Test and Validate
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Unit Tests
+        run: pytest
+
+      - name: Lint Code
+        run: flake8 .
+
+  # Step 2: CD - Deploy to Staging
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PAT }}
+
+      - name: Build and push Docker image to Staging
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: ${{ vars.DOCKER_USER }}/my-app:staging
+
+  # Step 3: CD - Deploy to Production
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PAT }}
+
+      - name: Build and push Docker image to Production
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: ${{ vars.DOCKER_USER }}/my-app:latest

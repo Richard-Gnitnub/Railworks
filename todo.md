@@ -6,7 +6,12 @@
 - [x] Installed dependencies for Django, CadQuery, and related tools.  
 - [x] Validate new project setup with end-to-end tests (e.g., admin panel accessibility). 
 - [x] implemented daisy UI to the admin
-- [ ] Test on Docker
+- [x] Test on Docker
+- [x] Setup Dockercloud
+- [x] Setup CI/CD pipeline
+- [x] Write contribution guidelines
+- [ ] Install coverage
+- [ ] Install code quality
 - [ ] Push to github
 
 ---

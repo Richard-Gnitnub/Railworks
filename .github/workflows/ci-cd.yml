@@ -57,7 +57,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tags: ${{ vars.DOCKER_USER }}/my-app:staging
+          push: true
+          tags: |
+            ${{ vars.DOCKER_USER }}/my-app:staging
+            ${{ vars.DOCKER_USER }}/my-app:${{ github.sha }}
+          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/my-app:cache
+          cache-to: type=inline,push=true
 
   # Step 3: CD - Deploy to Production
   deploy-production:
@@ -79,4 +84,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tags: ${{ vars.DOCKER_USER }}/my-app:latest
+          push: true
+          tags: |
+            ${{ vars.DOCKER_USER }}/my-app:latest
+            ${{ vars.DOCKER_USER }}/my-app:${{ github.sha }}
+          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/my-app:cache
+          cache-to: type=inline,push=true

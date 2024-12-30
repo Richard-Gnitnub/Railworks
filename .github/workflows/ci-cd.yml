@@ -59,9 +59,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ vars.DOCKER_USER }}/my-app:staging
-            ${{ vars.DOCKER_USER }}/my-app:${{ github.sha }}
-          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/my-app:cache
+            ${{ vars.DOCKER_USER }}/railworks:staging
+            ${{ vars.DOCKER_USER }}/railworks:${{ github.sha }}
+          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/railworks:cache
           cache-to: type=inline,push=true
 
   # Step 3: CD - Deploy to Production
@@ -86,7 +86,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ vars.DOCKER_USER }}/my-app:latest
-            ${{ vars.DOCKER_USER }}/my-app:${{ github.sha }}
-          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/my-app:cache
+            ${{ vars.DOCKER_USER }}/railworks:latest
+            ${{ vars.DOCKER_USER }}/railworks:${{ github.sha }}
+          cache-from: type=registry,ref=${{ vars.DOCKER_USER }}/railworks:cache
           cache-to: type=inline,push=true

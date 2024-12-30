@@ -1,6 +1,74 @@
 [tool.ruff]
-line-length = 88  # Match Black's default
+# Exclude commonly ignored directories and Django-specific directories like migrations.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "migrations",  # Django migrations
+    "__pycache__",  # Cache directories
+]
+
+# Black-compatible settings for line length and indentation.
+line-length = 88
+indent-width = 4
+
+# Set target Python version to align with your project.
 target-version = "py310"
-select = ["E", "F", "I"]  # Linting rules to enforce
-fixable = ["E", "F", "I"]  # Auto-fixable rules
-exclude = ["migrations", "__pycache__"]
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) rules by default.
+# Added rules to cover common Python issues and style preferences.
+select = [
+    "E4",  # Issues with indentation
+    "E7",  # Syntax errors
+    "E9",  # Logical errors
+    "F",   # Pyflakes (e.g., undefined names, unused imports)
+    "I",   # Import sorting
+]
+ignore = []
+
+# Allow fix for all enabled rules when `--fix` is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed (commonly used for ignored variables).
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Double quotes for strings to align with Black.
+quote-style = "double"
+
+# Indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Format code examples in docstrings (currently disabled by default).
+docstring-code-format = false
+
+# Use dynamic line length for code snippets in docstrings.
+docstring-code-line-length = "dynamic"

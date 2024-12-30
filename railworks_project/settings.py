@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -117,7 +118,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import sentry_sdk
 
 sentry_sdk.init(
     dsn="https://b0cf98fc2cafcc0ab276bbaccd312783@o4508557199605760.ingest.de.sentry.io/4508557385793616",

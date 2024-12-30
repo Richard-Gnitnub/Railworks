@@ -1,0 +1,27 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  ignore:
+    - "manage.py"
+    - "*/migrations/*"
+    - "*/__init__.py"
+    - "*/tests/factories.py"
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+comment:
+  layout: "diff, files, footer"
+  behavior: default
+  require_changes: yes
+  after_n_builds: 1

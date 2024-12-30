@@ -1,27 +1,29 @@
 import pytest
-from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+
 from trackbuilder_app.models import (
-    Gauge,
+    BullheadBossAndFerrule,
     BullheadChairs,
     BullheadJawSection,
     BullheadKey,
-    BullheadBossAndFerrule,
-    Track,
-    Timber,
-    UserProfile,
+    Gauge,
     STLDownloadLog,
+    Timber,
+    Track,
+    UserProfile,
 )
+
 from .factories import (
-    GaugeFactory,
+    BullheadBossAndFerruleFactory,
     BullheadChairsFactory,
     BullheadJawSectionFactory,
     BullheadKeyFactory,
-    BullheadBossAndFerruleFactory,
-    TrackFactory,
-    TimberFactory,
-    UserProfileFactory,
+    GaugeFactory,
     STLDownloadLogFactory,
+    TimberFactory,
+    TrackFactory,
+    UserProfileFactory,
 )
 
 

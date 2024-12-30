@@ -1,14 +1,15 @@
 from django.contrib import admin
+
 from .models import (
-    Gauge,
+    BullheadBossAndFerrule,
     BullheadChairs,
     BullheadJawSection,
     BullheadKey,
-    BullheadBossAndFerrule,
-    Track,
+    Gauge,
+    STLDownloadLog,
     Timber,
+    Track,
     UserProfile,
-    STLDownloadLog
 )
 
 
@@ -44,7 +45,13 @@ class BullheadBossAndFerruleAdmin(admin.ModelAdmin):
 
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
-    list_display = ('id', 'gauge', 'total_length', 'timber_spacing', 'chair_alignment', 'is_straight')
+    list_display = ('id', 
+                    'gauge', 
+                    'total_length', 
+                    'timber_spacing', 
+                    'chair_alignment', 
+                    'is_straight'
+                    )
     search_fields = ('gauge__name',)
 
 

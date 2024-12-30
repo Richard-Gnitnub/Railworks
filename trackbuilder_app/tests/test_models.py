@@ -20,7 +20,6 @@ from .factories import (
     BullheadBossAndFerruleFactory,
     TrackFactory,
     TimberFactory,
-    UserFactory,
     UserProfileFactory,
     STLDownloadLogFactory,
 )

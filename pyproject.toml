@@ -1,0 +1,6 @@
+[tool.ruff]
+line-length = 88  # Match Black's default
+target-version = "py310"
+select = ["E", "F", "I"]  # Linting rules to enforce
+fixable = ["E", "F", "I"]  # Auto-fixable rules
+exclude = ["migrations", "__pycache__"]

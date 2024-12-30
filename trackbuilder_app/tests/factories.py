@@ -1,5 +1,5 @@
 import factory
-from factory import Faker, Sequence, SubFactory
+from factory import Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from trackbuilder_app.models import (
     Gauge,

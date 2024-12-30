@@ -35,8 +35,8 @@ jobs:
       - name: Run Unit Tests
         run: pytest
 
-      - name: Lint Code
-        run: flake8 .
+      - name: Run Ruff
+        run: ruff check .
 
   # Step 2: CD - Deploy to Staging
   deploy-staging:

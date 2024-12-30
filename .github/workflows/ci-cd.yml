@@ -34,13 +34,13 @@ jobs:
         run: python manage.py migrate
 
       - name: Run tests
-        run: pytest --cov-branch --cov-report=xml
+        run: pytest
 
-      - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Richard-Gnitnub/Railworks
+      - name: Run coverage
+        run: coverage run manage.py test && coverage report
+
+      - name: Upload to Codecov
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
           
       - name: Run Ruff
         run: ruff check .

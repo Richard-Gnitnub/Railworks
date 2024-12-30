@@ -1,0 +1,13 @@
+[run]
+omit =
+    manage.py                        # Entry point, often boilerplate
+    */migrations/*                   # Auto-generated migration files
+    */__init__.py                    # Empty init files
+    */tests/factories.py             # Optional if test data factories are not a focus
+
+[report]
+exclude_lines =
+    # Ignore coverage for lines that are hard to test or irrelevant
+    pragma: no cover
+    if __name__ == "__main__":
+    raise NotImplementedError

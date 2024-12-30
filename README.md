@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/github/Richard-Gnitnub/Railworks/graph/badge.svg?token=WFXJ7Y2KVE)](https://codecov.io/github/Richard-Gnitnub/Railworks)
+
 # **PROJECT**:  
 **Lightweight Track Builder (Thank you to Martin Wynne, Templot provided the inspiration. I have used the data from chairs_unit.pas which exists in the database, the models have been shaped on the paremters defined by Martin in chairs_unit.pas)**  
 

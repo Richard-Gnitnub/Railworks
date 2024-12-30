@@ -54,14 +54,24 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PAT }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: "lab:latest"
+          driver: cloud
+          endpoint: "${{ secrets.DOCKER_USER }}/railworks"
+
       - name: Build and Push Docker Image to Staging
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true # Ensure the image is pushed to Docker Hub
+          push: true
           tags: |
             ${{ secrets.DOCKER_USER }}/railworks:staging
             ${{ secrets.DOCKER_USER }}/railworks:${{ github.sha }}
+          platforms: linux/amd64,linux/arm64 # Build for multiple architectures
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USER }}/railworks:cache
+          cache-to: type=inline,push=true
 
       # Docker Scout Compare Command
       - name: Docker Scout
@@ -92,11 +102,21 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PAT }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: "lab:latest"
+          driver: cloud
+          endpoint: "${{ secrets.DOCKER_USER }}/railworks"
+
       - name: Build and Push Docker Image to Production
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true # Ensure the image is pushed to Docker Hub
+          push: true
           tags: |
             ${{ secrets.DOCKER_USER }}/railworks:latest
             ${{ secrets.DOCKER_USER }}/railworks:${{ github.sha }}
+          platforms: linux/amd64,linux/arm64 # Build for multiple architectures
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USER }}/railworks:cache
+          cache-to: type=inline,push=true

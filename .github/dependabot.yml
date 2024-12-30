@@ -1,11 +1,40 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: "pip" # For Python dependencies
-    directory: "/" # The location of the `requirements.txt` file (root directory)
+  # Python Dependencies
+  - package-ecosystem: "pip"
+    directory: "/" # Location of requirements.txt
     schedule:
-      interval: "weekly" # Check for updates once a week
+      interval: "weekly" # Run updates weekly
+    open-pull-requests-limit: 10 # Limit open PRs to avoid CI/CD overload
+    groups:
+      django-related:
+        dependency-type: "production" # Production dependencies like Django
+      testing-tools:
+        dependency-type: "development" # Development dependencies like pytest
+      dev-tools:
+        dependency-type: "development" # Development tools like black, ruff
+    ignore:
+      - dependency-name: "django"
+        versions: ["<5.0"] # Ignore Django versions below 5.0
+
+  # Docker Dependencies
+  - package-ecosystem: "docker"
+    directory: "/" # The location of the Dockerfile
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5 # Limit for Docker updates
+    groups:
+      base-images:
+        dependency-type: "production" # Base images are used in production
+
+  # GitHub Actions Dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/" # Actions defined in the .github/workflows folder
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5 # Limit PRs for GitHub Actions updates
+    groups:
+      actions-core:
+        dependency-type: "production" # Essential GitHub Actions for production
+      actions-helpers:
+        dependency-type: "development" # Helper actions like linting or caching

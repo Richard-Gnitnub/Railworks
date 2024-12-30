@@ -11,6 +11,8 @@
 - [x] Setup CI/CD pipeline
 - [x] Write contribution guidelines
 - [x] Install Ruff linter, setup and auto fix
+- [x] Setup Docker Hub
+- [x] Setup Dependabot
 - [ ] Install coverage
 - [ ] Install code quality
 - [ ] Push to github

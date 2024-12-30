@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-Welcome to the project! This document outlines the workflow and best practices for contributing to the application. Following these guidelines will help maintain code quality, streamline development, and ensure smooth deployments.
+Welcome to the project! This document outlines the workflow and best practices for contributing to using the Github desktop application. Following these guidelines will help maintain code quality, streamline development, and ensure smooth deployments.
 
 ---
 

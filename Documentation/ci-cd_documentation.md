@@ -103,7 +103,6 @@ to use caching for faster builds:
 
 
 ```yaml
-Copy code
 - name: Build and Push Docker Image
   uses: docker/build-push-action@v5
   with:

@@ -10,6 +10,7 @@
 - [x] Setup Dockercloud
 - [x] Setup CI/CD pipeline
 - [x] Write contribution guidelines
+- [x] Install Ruff linter, setup and auto fix
 - [ ] Install coverage
 - [ ] Install code quality
 - [ ] Push to github

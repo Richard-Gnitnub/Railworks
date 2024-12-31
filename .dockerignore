@@ -36,3 +36,6 @@ coverage.xml
 
 # Node modules (if using a frontend with npm/yarn)
 node_modules/
+
+#save uploading errata
+.documentation/

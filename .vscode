@@ -1,0 +1,5 @@
+{
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "editor.formatOnSave": true
+  }
+  

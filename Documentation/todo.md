@@ -12,10 +12,16 @@
 - [x] Write contribution guidelines
 - [x] Install Ruff linter, setup and auto fix
 - [x] Setup Docker Hub
+- [x] Setup Docker cloud for builds
 - [x] Setup Dependabot
-- [ ] Install coverage
-- [ ] Install code quality
-- [ ] Push to github
+- [x] Install coverage
+- [x] Push to github
+- [ ] Setup Dev containers to prepare for Cadquery
+- [x] Install Cadquery
+- [x] Orientate to Cadquery
+- [ ] Develop Core functionality Cadquery scripts
+- [ ] Run test scripts in staging docker build
+- [ ] Merge to main when tests pass
 
 ---
 
@@ -27,8 +33,14 @@
 - [x] Test model relationships and ensure data integrity through Django admin and tests.  
 
 ### b. Geometry and STL Export
-- [ ] Adapt STL generation to integrate with Django views.  
-- [ ] Validate STL integrity and provide feedback on issues.  
+ - [x] Installed CadQuery Editor (CE) and verified it runs in a separate environment.
+ - [ ] Develop standalone CadQuery scripts for core STL generation features (e.g., timber and chair integration).
+ - [ ] Validate standalone CadQuery scripts using sample data.
+ - [ ] Test CadQuery scripts in a staging Docker build to ensure compatibility.
+ - [ ] Refine CadQuery scripts based on test results for edge cases and geometry issues.
+ - [ ] Prepare scripts for integration with Django views.
+ - [ ] Adapt STL generation to integrate with Django views.
+ - [ ] Validate STL integrity and provide feedback on issues via Django. 
 
 ### c. User Interface
 - [ ] Create forms or APIs in Django to allow users to download stls.  

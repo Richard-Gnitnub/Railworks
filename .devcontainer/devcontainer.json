@@ -1,0 +1,22 @@
+{
+  "name": "railworks",
+  "dockerFile": "Dockerfile",
+  "context": "..",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "batisteo.vscode-django",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt && python manage.py migrate && python manage.py createsuperuser --noinput --username admin --email admin@example.com",
+  "remoteUser": "vscode",
+  "forwardPorts": [8000],
+  "mounts": [
+    "source=${localWorkspaceFolderBasename},target=/workspace,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace"
+}

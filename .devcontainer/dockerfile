@@ -1,7 +1,13 @@
+# Base Image
 FROM python:3.10-slim
 
+# Set environment variables for consistent builds
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive
+
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential \
     libsqlite3-dev \
     libffi-dev \
@@ -13,9 +19,14 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /workspace
 
-# Install Python dependencies
+# Copy requirements file first to leverage Docker cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Setup default command
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+# Copy project files into the container
+COPY . .
+
+# Set default command
 CMD ["bash"]

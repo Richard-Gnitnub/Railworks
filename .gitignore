@@ -63,3 +63,16 @@ Thumbs.db
 # OS-specific files
 .DS_Store
 *.icloud
+# Ignore STEP and STL files
+*.step
+*.stl
+
+# Ignore media folder (Django-generated media files)
+media/
+
+# Ignore specific export subdirectories (if needed)
+media/resources/tiles/
+
+# Ignore temporary or cache files
+*.tmp
+*.log

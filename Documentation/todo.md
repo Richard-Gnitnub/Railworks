@@ -1,73 +1,90 @@
-# TODO List
+Here’s the **updated TODO list** based on the refined focus to get the database serving the CAD pipeline:
 
-## 1. Project Setup
+---
+
+# **TODO List**
+
+## **1. Project Setup**
 - [x] Transitioned the framework to Django.  
 - [x] Established Django project and core application structure.  
 - [x] Installed dependencies for Django, CadQuery, and related tools.  
-- [x] Validate new project setup with end-to-end tests (e.g., admin panel accessibility). 
-- [x] implemented daisy UI to the admin
-- [x] Test on Docker
-- [x] Setup Dockercloud
-- [x] Setup CI/CD pipeline
-- [x] Write contribution guidelines
-- [x] Install Ruff linter, setup and auto fix
-- [x] Setup Docker Hub
-- [x] Setup Docker cloud for builds
-- [x] Setup Dependabot
-- [x] Install coverage
-- [x] Push to github
-- [ ] Setup Dev containers to prepare for Cadquery
-- [x] Install Cadquery
-- [x] Orientate to Cadquery
-- [ ] Develop Core functionality Cadquery scripts
-- [ ] Run test scripts in staging docker build
-- [ ] Merge to main when tests pass
+- [x] Validated new project setup with end-to-end tests (e.g., admin panel accessibility).  
+- [x] Implemented Daisy UI for the admin panel.  
+- [x] Installed and configured DockerCloud for builds.  
+- [x] Setup CI/CD pipeline.  
+- [x] Wrote contribution guidelines.  
+- [x] Installed Ruff linter and applied fixes.  
+- [x] Setup Dependabot for dependency management.  
+- [x] Installed coverage and integrated it into CI pipelines.  
+- [x] Pushed the project to GitHub.  
+- [x] Installed and tested CadQuery.  
+- [x] Created the Flemish bond tile generation script (`flemish_brick_tile.py`).  
+- [x] Validated the script integration with Django and OCP CAD Viewer.  
+- [x] Added Django Ninja for API schema validation and CRUD operations.
 
 ---
 
-## 2. Core Functionality
+## **2. Core Functionality**
 
-### a. Database Models
-- [x] Migrated models (`Track`, `Gauge`, `Chair`, `Timber`, `STLDownloadLog`) from SQLModel to Django ORM. 
-- [x] Update model Chair model naming convention, `BullheadChairs`, `Bullhead BossAndFerrule`, `BullheadKey`, `BullheadJawSection`.
-- [x] Test model relationships and ensure data integrity through Django admin and tests.  
+### **a. CAD Pipeline**
+- [x] Design the CAD pipeline structure and flow based on Fx Bricks' example.  
+- [x] Build the first stage of the CAD pipeline (Flemish bond tile generation).  
+- [ ] Modify the pipeline to pull component parameters dynamically from the database.  
+- [ ] Implement caching for intermediate solids (e.g., chairs, timbers) in the pipeline.  
+- [ ] Optimize the pipeline to minimize redundant computations (e.g., bounding box caching).
 
-### b. Geometry and STL Export
- - [x] Installed CadQuery Editor (CE) and verified it runs in a separate environment.
- - [ ] Develop standalone CadQuery scripts for core STL generation features (e.g., timber and chair integration).
- - [ ] Validate standalone CadQuery scripts using sample data.
- - [ ] Test CadQuery scripts in a staging Docker build to ensure compatibility.
- - [ ] Refine CadQuery scripts based on test results for edge cases and geometry issues.
- - [ ] Prepare scripts for integration with Django views.
- - [ ] Adapt STL generation to integrate with Django views.
- - [ ] Validate STL integrity and provide feedback on issues via Django. 
+### **b. Database Integration**
+- [ ] Define and migrate minimal database models for chairs, timbers, and tracks.  
+- [ ] Enable the pipeline to query these models for parameters.  
+- [ ] Log pipeline exports (e.g., STEP/STL files) to track performance.  
 
-### c. User Interface
-- [ ] Create forms or APIs in Django to allow users to download stls.  
-- [ ] Provide functionality for STL file download.  
-
----
-
-## 3. Testing
-- [ ] Add Django-specific unit tests for models and views.  
-- [ ] Validate edge cases (e.g., invalid inputs, extreme values for parameters).  
-- [ ] Test updated STL generation and export.  
+### **c. Geometry and STL Export**
+- [x] Created a Flemish bond tile script with STEP/STL export.  
+- [x] Integrated export paths using Django's `MEDIA_ROOT`.  
+- [ ] Expand pipeline to log metadata for each export (e.g., dimensions, filename).  
+- [ ] Validate STL integrity and provide feedback during export.
 
 ---
 
-## 4. Documentation
-- [x] Updated README with new framework and goals.  
-- [ ] Create a troubleshooting guide specific to Django.  
-- [ ] Add examples for admin panel operations (CRUD for track components).  
+## **3. Testing**
+- [ ] Write basic tests for the database models to ensure they support the CAD pipeline.  
+- [ ] Validate edge cases (e.g., missing or invalid parameters).  
+- [ ] Test performance of the caching mechanism for intermediate solids.  
 
 ---
 
-## 5. Deployment
-- [ ] Test the application in a Dockerised environment with Django.  
-- [ ] Document deployment steps for Django in Docker.  
+## **4. Documentation**
+- [x] Updated README with new goals, framework, and setup instructions.  
+- [x] Added detailed documentation for the Flemish bond tile script.  
+- [x] Updated API documentation to include Django Ninja integration.  
+- [ ] Document the CAD pipeline's interaction with the database.  
+- [ ] Add examples showing how the pipeline queries and generates components.
 
 ---
 
-## 6. Future Enhancements
-- [x] Marked FastAPI-specific tasks as deprecated.  
-- [ ] Focus on post-MVP enhancements, including turnouts, curves, and advanced STL checks.  
+## **5. Deployment**
+- [ ] Test the application in a fully Dockerized environment with Celery and Redis.  
+- [ ] Document the deployment steps, including environment variables and service orchestration.
+
+---
+
+## **6. Future Enhancements**
+- [x] Removed FastAPI-specific tasks and migrated them to Django Ninja.  
+- [ ] Extend the pipeline to support advanced features (e.g., turnouts, curves).  
+- [ ] Explore role-based access control (RBAC) for multi-user workflows.  
+
+---
+
+### **Short-Term Priorities**
+1. **Database Integration**:
+   - Finalize minimal models for chairs, timbers, and tracks.
+   - Make the pipeline query these models for its inputs.
+2. **Pipeline Optimization**:
+   - Add caching for reusable components and subassemblies.
+   - Log and store intermediate solid metadata in the database.
+3. **Testing and Validation**:
+   - Ensure the pipeline functions correctly with real database inputs.
+
+---
+
+Does this align with your current priorities? Let me know if you’d like to add or revise any tasks! 🚀

@@ -32,21 +32,20 @@ mortar_width = brick_width * 0.9
 mortar_height = brick_height * 0.2
 mortar_length = brick_length + half_brick_length
 
-# Functions for creating bricks and mortar
-def create_full_brick_aligned():
-    """Creates a full-sized brick."""
-    brick = cq.Workplane("XY").box(brick_length, brick_width, brick_height)
-    return brick.translate((brick_length / 2, brick_width / 2, brick_height / 2))
+def create_full_brick_aligned(length=200, width=100, height=50):
+    """Creates a full-sized brick using specified dimensions."""
+    brick = cq.Workplane("XY").box(length, width, height)
+    return brick.translate((length / 2, width / 2, height / 2))
 
-def create_half_brick_aligned():
-    """Creates a half-sized brick."""
-    brick = cq.Workplane("XY").box(half_brick_length, brick_width, brick_height)
-    return brick.translate((half_brick_length / 2, brick_width / 2, brick_height / 2))
+def create_half_brick_aligned(length=100, width=100, height=50):
+    """Creates a half-sized brick using specified dimensions."""
+    brick = cq.Workplane("XY").box(length, width, height)
+    return brick.translate((length / 2, width / 2, height / 2))
 
-def create_mortar_row_layer():
-    """Creates a mortar row layer."""
-    mortar = cq.Workplane("XY").box(mortar_length, mortar_width, mortar_height)
-    return mortar.translate((mortar_length / 2, mortar_width / 2, mortar_height / 2))
+def create_mortar_row_layer(length=300, width=90, height=10):
+    """Creates a mortar row layer using specified dimensions."""
+    mortar = cq.Workplane("XY").box(length, width, height)
+    return mortar.translate((length / 2, width / 2, height / 2))
 
 # Create the first row
 def create_first_row():
@@ -94,24 +93,28 @@ def export_tile(tile, version="v1.0"):
     """
     Exports the tile to STEP and STL files in a versioned directory.
     """
-    try:
-        # Construct the output directory path
-        output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", f"v{version}")
-        os.makedirs(output_dir, exist_ok=True)
+    output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", f"v{version}")
 
-        # Define file paths
+    # Ensure directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Validate that the tile has valid geometry
+    if not tile.children:
+        raise ValueError("No shapes found to export. Tile is empty.")
+
+    try:
+        # File paths
         step_file_path = os.path.join(output_dir, f"flemish_tile_{version}.step")
         stl_file_path = os.path.join(output_dir, f"flemish_tile_{version}.stl")
 
-        # Export STEP and STL files
+        # Export files
         exporters.export(tile.toCompound(), step_file_path)
         exporters.export(tile.toCompound(), stl_file_path)
 
-        # Log successful exports
         print(f"STEP file exported to: {step_file_path}")
         print(f"STL file exported to: {stl_file_path}")
     except Exception as e:
-        print(f"Error exporting tile: {e}")
+        raise RuntimeError(f"Export failed: {e}")
 
 # Main execution
 if __name__ == "__main__":

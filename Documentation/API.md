@@ -1,7 +1,11 @@
-# API Design Document for Hybrid REST and Async API
+Here’s the updated **API Design Document** with **Django Ninja** incorporated into the existing architecture:
+
+---
+
+# **API Design Document for Hybrid REST and Async API**
 
 ## **Introduction**
-This document outlines the design for a hybrid API combining Django REST Framework (DRF) and Django Async capabilities. The API is designed to handle CRUD operations, asynchronous tasks like STL file generation, and support multiple concurrent users efficiently.
+This document outlines the design for a hybrid API combining **Django Ninja**, Django REST Framework (DRF), and Django Async capabilities. The API is designed to handle CRUD operations, asynchronous tasks like STL file generation, and support multiple concurrent users efficiently.
 
 ---
 
@@ -30,27 +34,27 @@ This document outlines the design for a hybrid API combining Django REST Framewo
 ---
 
 ### **2. Track and Component Management**
-- **Endpoints**:
+- **Endpoints** (Implemented with **Django Ninja**):
   - `GET /api/tracks/`: List all tracks.
   - `POST /api/tracks/`: Create new track configurations.
-  - `GET /api/tracks/<id>/`: Retrieve details of a specific track.
-  - `PUT /api/tracks/<id>/`: Update an existing track.
-  - `DELETE /api/tracks/<id>/`: Delete a track.
+  - `GET /api/tracks/{id}/`: Retrieve details of a specific track.
+  - `PUT /api/tracks/{id}/`: Update an existing track.
+  - `DELETE /api/tracks/{id}/`: Delete a track.
 
 - **Key Points**:
-  - CRUD operations will be synchronous, implemented using DRF.
-  - Support for filtering and pagination to handle large datasets.
+  - CRUD operations are now implemented using Django Ninja's type-safe schema-based endpoints.
+  - Support for filtering, pagination, and schema validation.
 
 ---
 
 ### **3. STL Generation**
 - **Endpoints**:
   - `POST /api/stl/generate/`: Initiate STL generation with track parameters.
-  - `GET /api/stl/status/<task_id>/`: Check the status of the generation task.
-  - `GET /api/stl/download/<file_id>/`: Download the generated STL file.
+  - `GET /api/stl/status/{task_id}/`: Check the status of the generation task.
+  - `GET /api/stl/download/{file_id}/`: Download the generated STL file.
 
 - **Key Points**:
-  - Use asynchronous views for task initiation and status checks.
+  - Use Django Ninja for clean schema validation and asynchronous support.
   - Offload intensive tasks to Celery workers.
   - Provide secure and time-limited download links for STL files.
 
@@ -59,20 +63,25 @@ This document outlines the design for a hybrid API combining Django REST Framewo
 ### **4. STL Download Logging**
 - **Endpoints**:
   - `GET /api/downloads/`: List user-specific download history.
-  - `DELETE /api/downloads/<id>/`: Delete a specific log entry.
+  - `DELETE /api/downloads/{id}/`: Delete a specific log entry.
 
 - **Key Points**:
-  - Log each STL download to maintain an audit trail.
-  - Provide users with visibility into their activity.
+  - Use Django Ninja's schema capabilities for validating and returning detailed log records.
+  - Maintain an audit trail for downloads and user activity.
 
 ---
 
 ## **Architecture Overview**
 
+### **Django Ninja Integration**
+- **Django Ninja**: A modern schema-based framework for defining type-safe REST APIs.
+  - Combines well with Django Async views and Celery tasks.
+  - Reduces boilerplate while improving maintainability and documentation.
+
 ### **Hybrid Approach**
-- **Django REST Framework (DRF)**: Handle all synchronous operations such as CRUD for tracks, timbers, and chairs.
+- **Django Ninja**: Handles all CRUD operations, validation, and schema generation.
 - **Django Async Views**: Implemented for endpoints requiring high concurrency (e.g., STL generation).
-- **Celery with Redis**: Manage long-running or computationally intensive tasks like STL generation.
+- **Celery with Redis**: Manages long-running or computationally intensive tasks like STL generation.
 
 ---
 
@@ -80,17 +89,17 @@ This document outlines the design for a hybrid API combining Django REST Framewo
 
 ### **Example: STL Generation Workflow**
 1. **Initiate Task**:
-   - Client sends a POST request to `/api/stl/generate/` with track parameters.
-   - The API validates inputs and queues the task using Celery.
+   - Client sends a `POST` request to `/api/stl/generate/` with track parameters.
+   - Django Ninja validates inputs and queues the task using Celery.
    - Response includes a `task_id` for tracking.
 
 2. **Check Status**:
-   - Client sends a GET request to `/api/stl/status/<task_id>/`.
+   - Client sends a `GET` request to `/api/stl/status/{task_id}/`.
    - The API checks the task status in Redis and responds with `pending`, `in-progress`, or `completed`.
 
 3. **Download File**:
    - Upon task completion, a secure file URL is generated.
-   - Client downloads the file using `/api/stl/download/<file_id>/`.
+   - Client downloads the file using `/api/stl/download/{file_id}/`.
 
 ---
 
@@ -103,7 +112,7 @@ This document outlines the design for a hybrid API combining Django REST Framewo
 
 ## **Error Handling**
 1. **Validation Errors**:
-   - Return HTTP 400 with error details if input validation fails.
+   - Return HTTP 422 with detailed error messages if schema validation fails.
 2. **Authentication Errors**:
    - Return HTTP 401 for invalid or missing tokens.
 3. **Task Errors**:
@@ -125,12 +134,18 @@ This document outlines the design for a hybrid API combining Django REST Framewo
 ---
 
 ## **Future Enhancements**
-1. Add support for GraphQL to provide flexible querying for complex data relationships.
-2. Extend STL generation to handle advanced configurations like turnouts and curves.
-3. Implement role-based access control (RBAC) for different user tiers (e.g., admin, premium users).
-4. Introduce WebSocket-based real-time updates for task statuses.
+1. **GraphQL Integration**:
+   - Add support for GraphQL to provide flexible querying for complex data relationships.
+2. **Advanced STL Configurations**:
+   - Extend STL generation to handle advanced configurations like turnouts and curves.
+3. **Role-Based Access Control (RBAC)**:
+   - Implement RBAC for different user tiers (e.g., admin, premium users).
+4. **Real-Time Updates**:
+   - Introduce WebSocket-based real-time updates for task statuses.
 
 ---
 
 ## **Conclusion**
-This API design balances simplicity and scalability, leveraging the strengths of Django REST Framework for CRUD operations and Django Async for handling high-performance, concurrent tasks. The integration of Celery ensures efficient task management, making the system robust and user-friendly.
+This updated API design leverages **Django Ninja** for type-safe and schema-driven REST endpoints, combined with Celery and Django Async for efficient task management. The architecture balances simplicity and scalability, ensuring the system can accommodate both developers' and users' needs.
+
+---

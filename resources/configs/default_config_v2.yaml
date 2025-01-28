@@ -6,10 +6,10 @@ mortar_chamfer: 5  # Chamfer size for simulating mortar gaps
 
 offset_x: 0
 offset_y: 0
-offset_z: 50
+offset_z: 0
 
-row_repetition: 3  # Number of rows per tile
-tile_width: 2      # Number of bricks per row
+row_repetition: 4  # Number of rows per tile
+tile_width: 4 # Number of bricks per row
 
 export_formats:
   - step

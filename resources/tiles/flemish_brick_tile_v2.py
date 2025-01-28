@@ -63,43 +63,58 @@ def create_half_brick_aligned(length=config["brick_length"] / 2, width=config["b
 
 def create_flemish_tile():
     """
-    Creates a Flemish bond tile with alternating row patterns.
-    Each row alternates between starting with a half brick and a full brick.
+    Creates a Flemish bond tile with proper alternating row patterns.
+    Even rows are offset so the centres of half bricks align with the centres of full bricks in odd rows.
     """
-    offset_X = config.get("offset_X", 0)
-    offset_Y = config.get("offset_Y", 0)
-    offset_Y = config.get("offset_Y", 0)
-    row_repetition = config["row_repetition"]
-    tile_width = config["tile_width"]
+    # Retrieve offsets and configuration values
+    offset_X = config.get("offset_X", 0)  # X-axis offset between rows (horizontal shift between rows)
+    row_repetition = config["row_repetition"]  # Number of rows in the tile
+    tile_width = config["tile_width"]  # Number of bricks per row
 
+    # Create an assembly for the entire tile
     tile_assembly = cq.Assembly()
 
+    # Loop through rows to build the tile
     for i in range(row_repetition):
+        # Create an assembly for the current row
         row_assembly = cq.Assembly()
         half_brick = create_half_brick_aligned()
         full_brick = create_full_brick_aligned()
 
-        # Determine starting brick for the row (alternate pattern)
-        start_with_half_brick = (i % 2 == 0)
+        # Step 1: Determine X-offset for the entire row
+        row_x_offset = 0
+        if i % 2 != 0:  # For even rows only
+            row_x_offset = -config["brick_length"] / 1.5  # Offset even rows to align centres
 
+        # Step 2: Initialize the X-offset for bricks in this row
+        x_offset = row_x_offset
+
+        # Step 3: Add bricks to the row
         for j in range(tile_width):
-            x_offset = j * config["brick_length"]
+            if j % 2 == 0:  # Add a full brick
+                row_assembly.add(
+                    full_brick,
+                    loc=cq.Location(cq.Vector(x_offset, 0, 0)),
+                    name=f"Full Brick Row{i}-Col{j}"
+                )
+                x_offset += config["brick_length"]  # Increment for the next position
+            else:  # Add a half brick
+                row_assembly.add(
+                    half_brick,
+                    loc=cq.Location(cq.Vector(x_offset, 0, 0)),
+                    name=f"Half Brick Row{i}-Col{j}"
+                )
+                x_offset += config["brick_length"] / 2  # Increment for the next position
 
-            # Alternate starting brick pattern
-            if start_with_half_brick:
-                if j % 2 == 0:
-                    row_assembly.add(half_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)), name=f"Half Brick Row{i}-Col{j}")
-                else:
-                    row_assembly.add(full_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)), name=f"Full Brick Row{i}-Col{j}")
-            else:
-                if j % 2 == 0:
-                    row_assembly.add(full_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)), name=f"Full Brick Row{i}-Col{j}")
-                else:
-                    row_assembly.add(half_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)), name=f"Half Brick Row{i}-Col{j}")
+        # Step 4: Calculate Z-offset for the row to ensure proper stacking
+        z_offset = i * config["brick_height"]
 
-        # Adjust vertical offset using offset_Z
-        z_offset = i * config["brick_height"]  # Add vertical alignment
-    tile_assembly.add(row_assembly, loc=cq.Location(cq.Vector(0, 0, z_offset)), name=f"Row {i}")
+        # Step 5: Add the row assembly to the tile with calculated offsets
+        tile_assembly.add(
+            row_assembly,
+            loc=cq.Location(cq.Vector(offset_X * i, 0, z_offset)),
+            name=f"Row {i}"
+        )
 
     return tile_assembly
 

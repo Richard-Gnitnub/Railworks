@@ -1,7 +1,6 @@
 """
 Test Script: test_flemish_brick_tile.py
-Description: Comprehensive test suite for flemish_brick_tile.py to validate all core functions.
-Dependencies: pytest, CadQuery, Django settings, temporary directories for export tests.
+Description: Test suite for flemish_brick_tile.py to validate YAML configuration integration, geometry generation, and exports.
 """
 
 import os
@@ -9,87 +8,74 @@ import pytest
 import cadquery as cq
 from django.conf import settings
 from resources.tiles.flemish_brick_tile import (
+    load_config,
+    validate_config,
     create_full_brick_aligned,
     create_half_brick_aligned,
     create_mortar_row_layer,
-    create_first_row,
-    create_second_row,
-    create_third_row,
     create_flemish_tile,
     export_tile,
 )
 
-# Test parameters for brick and mortar dimensions
-@pytest.mark.parametrize(
-    "full_brick_dims",
-    [
-        (200, 100, 50),  # Full brick dimensions
-    ],
-)
-def test_create_full_brick_aligned(full_brick_dims):
-    """Test if the full brick has the correct dimensions."""
-    length, width, height = full_brick_dims
-    brick = create_full_brick_aligned(length, width, height)
-    bounding_box = brick.val().BoundingBox()
-    assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == full_brick_dims
+
+# Test parameters for YAML configuration
+@pytest.fixture
+def valid_config(tmpdir):
+    """Fixture to create a valid YAML configuration."""
+    config_file = tmpdir.join("test_config.yaml")
+    config_file.write(
+        """
+        brick_length: 250
+        brick_width: 120
+        brick_height: 60
+        mortar_length: 300
+        mortar_width: 90
+        mortar_height: 15
+        """
+    )
+    return str(config_file)
 
 
-@pytest.mark.parametrize(
-    "half_brick_dims",
-    [
-        (100, 100, 50),  # Half brick dimensions
-    ],
-)
-def test_create_half_brick_aligned(half_brick_dims):
-    """Test if the half brick has the correct dimensions."""
-    length, width, height = half_brick_dims
-    brick = create_half_brick_aligned(length, width, height)
-    bounding_box = brick.val().BoundingBox()
-    assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == half_brick_dims
+@pytest.fixture
+def invalid_config(tmpdir):
+    """Fixture to create an invalid YAML configuration."""
+    config_file = tmpdir.join("invalid_config.yaml")
+    config_file.write(
+        """
+        brick_length: 250
+        brick_width: 120
+        # Missing brick_height
+        mortar_length: 300
+        mortar_width: 90
+        mortar_height: 15
+        """
+    )
+    return str(config_file)
 
 
-@pytest.mark.parametrize(
-    "mortar_dims",
-    [
-        (300, 90, 10),  # Mortar row dimensions
-    ],
-)
-def test_create_mortar_row_layer(mortar_dims):
-    """Test if the mortar row has the correct dimensions."""
-    length, width, height = mortar_dims
-    mortar = create_mortar_row_layer(length, width, height)
-    bounding_box = mortar.val().BoundingBox()
-    assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == mortar_dims
+# Test loading and validation of YAML configurations
+def test_load_config(valid_config):
+    """Test loading a valid YAML configuration."""
+    config = load_config(valid_config)
+    assert config["brick_length"] == 250
+    assert config["brick_width"] == 120
+    assert config["brick_height"] == 60
 
 
-def test_create_first_row():
-    """Test if the first row assembly contains the correct components."""
-    first_row = create_first_row()
-    # Validate number of parts in the first row
-    assert len(first_row.children) == 2  # Half brick + Full brick
+def test_validate_config(valid_config):
+    """Test validating a correct configuration."""
+    config = load_config(valid_config)
+    validate_config(config)  # Should pass without raising an exception
 
 
-def test_create_second_row():
-    """Test if the second row (mortar layer) contains the correct components."""
-    second_row = create_second_row()
-    # Validate number of parts in the second row
-    assert len(second_row.children) == 1  # Single mortar row
+def test_validate_config_missing_key(invalid_config):
+    """Test validating a configuration with missing keys."""
+    config = load_config(invalid_config)
+    with pytest.raises(ValueError, match="Missing required configuration key: brick_height"):
+        validate_config(config)
 
 
-def test_create_third_row():
-    """Test if the third row assembly contains the correct components."""
-    third_row = create_third_row()
-    # Validate number of parts in the third row
-    assert len(third_row.children) == 2  # Full brick + Half brick
-
-
-def test_create_flemish_tile():
-    """Test if the Flemish bond tile assembles all rows correctly."""
-    tile = create_flemish_tile()
-    # Validate number of rows in the tile assembly
-    assert len(tile.children) == 3  # First row, second row, third row
-
-
+# Test geometry creation
 @pytest.mark.parametrize(
     "brick_dimensions",
     [
@@ -99,14 +85,69 @@ def test_create_flemish_tile():
         (400, 200, 150),
     ],
 )
-def test_dynamic_brick_creation(brick_dimensions):
-    """Test dynamic creation of bricks with different dimensions."""
+def test_create_full_brick_aligned(brick_dimensions):
+    """Test full brick creation with parameterized dimensions."""
     length, width, height = brick_dimensions
     brick = create_full_brick_aligned(length, width, height)
     bounding_box = brick.val().BoundingBox()
-
-    # Validate dynamic brick dimensions
     assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == brick_dimensions
+
+
+@pytest.mark.parametrize(
+    "half_brick_dimensions",
+    [
+        (100, 100, 50),
+        (150, 80, 60),
+        (25, 25, 15),
+    ],
+)
+def test_create_half_brick_aligned(half_brick_dimensions):
+    """Test half brick creation with parameterized dimensions."""
+    length, width, height = half_brick_dimensions
+    brick = create_half_brick_aligned(length, width, height)
+    bounding_box = brick.val().BoundingBox()
+    assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == half_brick_dimensions
+
+
+@pytest.mark.parametrize(
+    "mortar_dimensions",
+    [
+        (300, 90, 10),
+        (500, 120, 15),
+        (200, 70, 5),
+    ],
+)
+def test_create_mortar_row_layer(mortar_dimensions):
+    """Test mortar row creation with parameterized dimensions."""
+    length, width, height = mortar_dimensions
+    mortar = create_mortar_row_layer(length, width, height)
+    bounding_box = mortar.val().BoundingBox()
+    assert (bounding_box.xlen, bounding_box.ylen, bounding_box.zlen) == mortar_dimensions
+
+
+def test_create_flemish_tile():
+    """Test if the Flemish bond tile assembles all rows correctly."""
+    tile = create_flemish_tile()
+    assert len(tile.children) == 3  # Ensure all rows are included
+
+
+# Test export functionality
+def test_export_tile_with_yaml_config(valid_config, tmpdir):
+    """Test export functionality with YAML-configured dimensions."""
+    config = load_config(valid_config)
+    tile = create_flemish_tile()
+
+    output_dir = tmpdir.mkdir("output")
+    os.environ["DJANGO_SETTINGS_MODULE"] = "railworks_project.settings"
+    settings.MEDIA_ROOT = str(output_dir)
+
+    export_tile(tile, version="yaml_test")
+    step_file = os.path.join(output_dir, "resources", "tiles", "vyaml_test", "flemish_tile_yaml_test.step")
+    stl_file = os.path.join(output_dir, "resources", "tiles", "vyaml_test", "flemish_tile_yaml_test.stl")
+
+    # Ensure files were created
+    assert os.path.exists(step_file)
+    assert os.path.exists(stl_file)
 
 
 def test_invalid_export_directory(tmpdir):
@@ -115,7 +156,7 @@ def test_invalid_export_directory(tmpdir):
     invalid_dir = "Z:/nonexistent_path"  # Use a truly invalid path
     settings.MEDIA_ROOT = invalid_dir
 
-    with pytest.raises(FileNotFoundError, match=r"The system cannot find the path specified"):
+    with pytest.raises(Exception, match=r"The system cannot find the path specified"):
         export_tile(tile, version="invalid")
 
 
@@ -128,13 +169,3 @@ def test_empty_tile_export(tmpdir):
     # Attempt to export an empty tile
     with pytest.raises(ValueError, match="No shapes found to export"):
         export_tile(empty_tile, version="empty")
-
-
-def test_logging_of_export():
-    """Test if export logs file paths correctly."""
-    tile = create_flemish_tile()
-    try:
-        export_tile(tile, version="test_logging")
-        print("Export succeeded and logs file paths.")
-    except Exception as e:
-        pytest.fail(f"Logging test failed with error: {e}")

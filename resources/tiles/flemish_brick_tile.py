@@ -1,12 +1,13 @@
 """
 Script: flemish_brick_tile.py
 Description: Creates a Flemish bond tile using perfectly aligned bricks and mortar. Exports the result as a watertight STEP and STL file.
-Dependencies: CadQuery, Django settings, OCP CAD Viewer
+Dependencies: CadQuery, Django settings, OCP CAD Viewer, PyYAML
 """
 
 import os
 import sys
 import django
+import yaml
 import cadquery as cq
 from cadquery import exporters
 from ocp_vscode import show_object  # Enable visualization in VS Code
@@ -22,15 +23,33 @@ django.setup()
 # Debug: Verify Python Path
 print("Python Path:", sys.path)
 
-# Define brick and mortar dimensions (in mm)
-brick_length = 200
-brick_width = 100
-brick_height = 50
-half_brick_length = brick_length / 2
-mortar_thickness = 10
-mortar_width = brick_width * 0.9
-mortar_height = brick_height * 0.2
-mortar_length = brick_length + half_brick_length
+# Path to configuration file
+CONFIG_DIR = os.path.join(os.path.dirname(__file__), "../configs/")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "default_config.yaml")
+
+
+def load_config(config_file=CONFIG_FILE):
+    """Load configuration from a YAML file."""
+    if not os.path.exists(config_file):
+        raise FileNotFoundError(f"Configuration file not found: {config_file}")
+    with open(config_file, "r") as file:
+        return yaml.safe_load(file)
+
+
+def validate_config(config):
+    """Ensure the YAML config contains all required keys."""
+    required_keys = [
+        "brick_length", "brick_width", "brick_height",
+        "mortar_length", "mortar_width", "mortar_height",
+    ]
+    for key in required_keys:
+        if key not in config:
+            raise ValueError(f"Missing required configuration key: {key}")
+
+
+# Load and validate configuration
+config = load_config()
+validate_config(config)
 
 def create_full_brick_aligned(length=200, width=100, height=50):
     """Creates a full-sized brick using specified dimensions."""
@@ -54,8 +73,9 @@ def create_first_row():
     half_brick = create_half_brick_aligned()
     full_brick = create_full_brick_aligned()
     assembly.add(half_brick, loc=cq.Location(cq.Vector(0, 0, 0)), name="Half Brick")
-    assembly.add(full_brick, loc=cq.Location(cq.Vector(half_brick_length, 0, 0)), name="Full Brick")
+    assembly.add(full_brick, loc=cq.Location(cq.Vector(config["brick_length"] / 2, 0, 0)), name="Full Brick")
     return assembly
+
 
 # Create the second row (mortar layer)
 def create_second_row():
@@ -65,6 +85,7 @@ def create_second_row():
     assembly.add(mortar_row, loc=cq.Location(cq.Vector(0, 0, 0)), name="Mortar Row")
     return assembly
 
+
 # Create the third row
 def create_third_row():
     """Creates the third row of bricks."""
@@ -72,8 +93,9 @@ def create_third_row():
     full_brick = create_full_brick_aligned()
     half_brick = create_half_brick_aligned()
     assembly.add(full_brick, loc=cq.Location(cq.Vector(0, 0, 0)), name="Full Brick")
-    assembly.add(half_brick, loc=cq.Location(cq.Vector(brick_length, 0, 0)), name="Half Brick")
+    assembly.add(half_brick, loc=cq.Location(cq.Vector(config["brick_length"], 0, 0)), name="Half Brick")
     return assembly
+
 
 # Combine the rows into a three-row wall (the Flemish bond tile)
 def create_flemish_tile():
@@ -84,10 +106,11 @@ def create_flemish_tile():
 
     wall_assembly = cq.Assembly()
     wall_assembly.add(first_row, loc=cq.Location(cq.Vector(0, 0, 0)), name="First Row")
-    wall_assembly.add(second_row, loc=cq.Location(cq.Vector(0, 0, brick_height)), name="Second Row")
-    wall_assembly.add(third_row, loc=cq.Location(cq.Vector(0, 0, brick_height + mortar_height)), name="Third Row")
+    wall_assembly.add(second_row, loc=cq.Location(cq.Vector(0, 0, config["brick_height"])), name="Second Row")
+    wall_assembly.add(third_row, loc=cq.Location(cq.Vector(0, 0, config["brick_height"] + config["mortar_height"])), name="Third Row")
     
     return wall_assembly
+
 
 def export_tile(tile, version="v1.0"):
     """
@@ -115,6 +138,7 @@ def export_tile(tile, version="v1.0"):
         print(f"STL file exported to: {stl_file_path}")
     except Exception as e:
         raise RuntimeError(f"Export failed: {e}")
+
 
 # Main execution
 if __name__ == "__main__":

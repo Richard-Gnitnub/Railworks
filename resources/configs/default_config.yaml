@@ -1,0 +1,7 @@
+# Default configuration for brick and mortar dimensions
+brick_length: 200
+brick_width: 100
+brick_height: 50
+mortar_length: 300
+mortar_width: 90
+mortar_height: 10

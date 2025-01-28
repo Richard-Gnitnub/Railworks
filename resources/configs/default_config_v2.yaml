@@ -1,0 +1,16 @@
+brick_length: 250
+brick_width: 120
+brick_height: 60
+
+mortar_chamfer: 5  # Chamfer size for simulating mortar gaps
+
+offset_x: 0
+offset_y: 0
+offset_z: 50
+
+row_repetition: 2  # Number of rows per tile
+tile_width: 2      # Number of bricks per row
+
+export_formats:
+  - step
+  - stl

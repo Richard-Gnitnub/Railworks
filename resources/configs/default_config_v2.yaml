@@ -8,7 +8,7 @@ offset_x: 0
 offset_y: 0
 offset_z: 50
 
-row_repetition: 2  # Number of rows per tile
+row_repetition: 3  # Number of rows per tile
 tile_width: 2      # Number of bricks per row
 
 export_formats:

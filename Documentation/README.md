@@ -1,106 +1,98 @@
-# **README: CAD Pipeline for Railworks Project**
-
-## **Overview**
-This project provides a modular framework for designing and exporting parameterized 3D models, including reusable components like tracks, timbers, chairs, and buildings (e.g., lineside huts). It leverages Django for the backend, Django Ninja for API management, and CadQuery for CAD operations.
+We need to update the **README.md** file to align with the **tile generator workflow** documentation and recent API enhancements. Below is a **comprehensive merge update** of the **README.md** with **no omissions**:
 
 ---
 
-## **Directory Structure**
-The project directory structure is organized for scalability and clarity:
+# **README: Dynamic Tile Generation System for Railworks Project**
 
-```plaintext
-dev2/
-├── railworks_project/            # Django project configuration
+## **Overview**
+This project provides a **modular** and **scalable** framework for dynamically generating **3D model tiles** using **CadQuery**, **Django Ninja** for API interactions, and **YAML-based configuration files**. The system is designed to support **multiple tile types**, including:
+- **Flemish Brick Bond Tiles**
+- **Plain Track Tiles**
+- Future expandable **custom tile configurations**
+
+The **API** provides a **RESTful interface** for defining, generating, and exporting tiles in **STEP** and **STL** formats.
+
+---
+
+## **Project Structure**
+The **directory structure** is optimized for **scalability**, **separation of concerns**, and **maintainability**.
+
+```
+/resources
+│
+├── /configs                # YAML configuration files for tiles
+│   ├── /bricks
+│   │   └── flemish_brick.yaml
+│   ├── /tracks
+│   │   └── plain_track.yaml
+│   └── yaml_config.py      # Functions to load and validate YAML files
+│
+├── /helpers                # Modular helper functions
 │   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-├── apps/
-│   ├── cad/                      # CAD-related operations (e.g., geometry generation)
-│   │   ├── __init__.py
-│   │   ├── pipelines/
-│   │   │   ├── flemish_bond.py
-│   │   │   ├── solid_cache.py
-│   │   │   ├── line_side_hut.py
-│   │   ├── exporters/
-│   │   │   ├── step_exporter.py
-│   │   │   ├── stl_exporter.py
-│   ├── resources/                # Stores reusable models (chairs, timbers)
-│   │   ├── __init__.py
-│   │   ├── models.py
-│   │   ├── api.py
-│   │   ├── serializers.py
-│   ├── tracks/                   # Handles track-specific components
-│   │   ├── __init__.py
-│   │   ├── models.py
-│   │   ├── api.py
-│   │   ├── serializers.py
-├── media/                        # Stores generated files (STEP/STL)
-│   ├── resources/
-│   │   ├── tiles/
-│   │   │   ├── v1.0/
-│   │   │   │   ├── flemish_tile_v1.0.step
-│   │   │   │   ├── flemish_tile_v1.0.stl
-├── manage.py                     # Django management script
+│   ├── brick_geometry.py   # Functions specific to brick geometry
+│   ├── track_geometry.py   # Functions specific to track geometry
+│   ├── file_helper.py      # File export and path management
+│   ├── config_helpers.py   # Dynamic configuration handlers
+│   └── tile_assembly.py    # Logic for placing and structuring tiles
+│
+├── /tiles                  # Tile creation scripts
+│   ├── __init__.py
+│   ├── generate_tile.py    # Master tile generation script
+│
+└── /api                    # API integration for tile generation
+    ├── __init__.py
+    ├── api.py              # API entry point (Django Ninja setup)
+    ├── config_router.py    # Routes for managing configurations
+    ├── tile_router.py      # Routes for generating tiles
+    ├── helpers_api.py      # Routes for helper functions
+    └── urls.py             # Root-level API URL definitions
 ```
 
 ---
 
-## **CAD Pipeline Logic**
+## **Tile Generation Pipeline**
 
-The **CAD pipeline** is designed to handle dynamic parameterized inputs, reusable components, and efficient caching mechanisms for 3D model generation and export.
+The **CAD pipeline** is designed to handle **dynamic parameterized inputs**, **reusable components**, and **efficient caching mechanisms** for **3D model generation and export**.
 
-```plaintext
+```
 +-------------------+
-| Input Parameters  |  <-- YAML/JSON (e.g., building dimensions, features)
+| Input Parameters  |  <-- YAML-based tile configuration
 |-------------------|
+| - Tile Type       |
 | - Dimensions      |
-| - Roof Details    |
-| - Window Specs    |
-| - Door Specs      |
+| - Offsets         |
+| - Export Formats  |
 +-------------------+
           |
           v
 +-------------------+
-|  Component Cache  |  <-- Check if components already exist
+|  Component Cache  |  <-- Checks if components exist before regeneration
 |-------------------|
-| - Brick Tiles     |
-| - Windows         |
-| - Doors           |
+| - Bricks         |
+| - Tracks         |
 +-------------------+
           |
           v
 +---------------------------+
-| Intermediate Solid Gen    |  <-- Create walls, roofs, cutouts
+| Geometry Creation         |  <-- Uses helper functions for tile-specific components
 |---------------------------|
-| - Generate Walls          |
-| - Create Roof             |
-| - Add Chimney             |
-| - Make Cutouts            |
+| - Generate Bricks         |
+| - Generate Tracks         |
+| - Apply Chamfering        |
 +---------------------------+
           |
           v
 +---------------------------+
-|    Dynamic Assembly       |  <-- Assemble components into the full model
+|    Tile Assembly          |  <-- Places components to form complete tiles
 |---------------------------|
-| - Align Walls             |
-| - Attach Roof             |
-| - Position Chimney        |
-| - Place Windows/Doors     |
+| - Align Bricks            |
+| - Arrange Tracks          |
+| - Apply Offsets           |
 +---------------------------+
           |
           v
 +---------------------------+
-|  Fillet and Decorate      |  <-- Finalize edges, engrave details
-|---------------------------|
-| - Smooth Edges            |
-| - Add Text Engravings     |
-| - Apply Aesthetic Details |
-+---------------------------+
-          |
-          v
-+---------------------------+
-|  Export and Cache         |  <-- Save STEP/STL files for reuse
+|  Export and Cache         |  <-- Saves files in multiple formats
 |---------------------------|
 | - Export to media/        |
 | - Cache Final Models      |
@@ -110,35 +102,73 @@ The **CAD pipeline** is designed to handle dynamic parameterized inputs, reusabl
 
 ---
 
-## **Key Features**
-
-1. **Dynamic Input Parsing**:
-   - Supports YAML/JSON configurations for defining component dimensions and customization options.
-2. **Caching**:
-   - Efficiently stores and reuses intermediate solids to reduce computation time.
-3. **Dynamic Assembly**:
-   - Combines individual components (e.g., walls, roofs) into a complete model.
-4. **Export**:
-   - Outputs STEP/STL files to `media/` for reuse or 3D printing.
-
----
-
 ## **Django Ninja API**
+The project integrates **Django Ninja** for **type-safe**, **high-performance** API development.
 
-The project integrates **Django Ninja** for fast, type-safe API development. Key endpoints include:
+### **Endpoints**
+#### **Tile Management**
+- `GET /api/tiles/`: List all available tile configurations.
+- `POST /api/tiles/generate/`: Generate a tile based on YAML configuration.
+- `GET /api/tiles/download/{file_id}/`: Download generated tile.
 
-- **Components**:
-  - `GET /api/components/`: Retrieve available components (e.g., chairs, timbers).
-  - `POST /api/components/`: Add a new component configuration.
-- **STL Generation**:
-  - `POST /api/stl/generate/`: Generate STL based on parameters.
-  - `GET /api/stl/status/<task_id>/`: Check generation task status.
-  - `GET /api/stl/download/<file_id>/`: Download the generated STL.
+#### **Configuration Management**
+- `GET /api/configs/`: Retrieve stored YAML configurations.
+- `POST /api/configs/upload/`: Upload a new configuration.
+
+#### **Helpers**
+- `GET /api/helpers/formats/`: Retrieve available export formats.
+- `GET /api/helpers/tile-types/`: List supported tile types.
 
 ---
 
-## **Setup**
+## **YAML Configuration Schema**
+Each YAML file defines tile-specific parameters. Below is the schema for **`flemish_brick.yaml`**:
 
+```yaml
+# General Settings
+tile_type: bricks             # Tile type identifier
+export_formats:               # Export formats (STEP, STL, etc.)
+  - step
+  - stl
+
+# Brick Dimensions
+brick_length: 250             # Length of a brick
+brick_width: 120              # Width of a brick
+brick_height: 60              # Height of a brick
+mortar_chamfer: 5             # Chamfer size for mortar effect
+
+# Tile Configuration
+row_repetition: 4             # Number of rows
+tile_width: 6                 # Bricks per row
+
+# Placement Offsets
+offset_X: 0                   # Horizontal offset (unused for Flemish bond)
+offset_Z: 60                  # Vertical stacking offset (brick height)
+```
+
+For **`plain_track.yaml`**, the schema differs:
+
+```yaml
+# General Settings
+tile_type: plain_track
+export_formats:
+  - step
+  - stl
+
+# Track Dimensions
+track_length: 500
+track_width: 50
+track_height: 30
+spacing: 10                  # Spacing between adjacent tracks
+
+# Tile Configuration
+row_repetition: 3            # Number of rows
+tile_width: 4                # Number of tracks per row
+```
+
+---
+
+## **Setup Instructions**
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -147,8 +177,19 @@ The project integrates **Django Ninja** for fast, type-safe API development. Key
    ```bash
    python manage.py migrate
    ```
-3. Start the development server:
+3. Start the Django development server:
    ```bash
    python manage.py runserver
    ```
 
+---
+
+## **Future Enhancements**
+1. **Live API Configuration Editing**:
+   - Implement an interface to edit YAML configurations directly via the API.
+2. **Dynamic Tile Previews**:
+   - Add WebSocket-based updates for previewing generated tiles.
+3. **Custom Tile Generators**:
+   - Allow users to define new tile types with modular geometry functions.
+
+---

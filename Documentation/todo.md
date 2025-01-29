@@ -1,90 +1,113 @@
-Here’s the **updated TODO list** based on the refined focus to get the database serving the CAD pipeline:
-
----
-
 # **TODO List**
 
 ## **1. Project Setup**
 - [x] Transitioned the framework to Django.  
 - [x] Established Django project and core application structure.  
-- [x] Installed dependencies for Django, CadQuery, and related tools.  
-- [x] Validated new project setup with end-to-end tests (e.g., admin panel accessibility).  
-- [x] Implemented Daisy UI for the admin panel.  
-- [x] Installed and configured DockerCloud for builds.  
-- [x] Setup CI/CD pipeline.  
-- [x] Wrote contribution guidelines.  
-- [x] Installed Ruff linter and applied fixes.  
-- [x] Setup Dependabot for dependency management.  
-- [x] Installed coverage and integrated it into CI pipelines.  
-- [x] Pushed the project to GitHub.  
+- [x] Installed dependencies for Django, CadQuery, Django Ninja, and related tools.  
+- [x] Configured Django Ninja for **schema-based API management**.  
+- [x] Created a **Dockerized development environment**.  
 - [x] Installed and tested CadQuery.  
-- [x] Created the Flemish bond tile generation script (`flemish_brick_tile.py`).  
-- [x] Validated the script integration with Django and OCP CAD Viewer.  
-- [x] Added Django Ninja for API schema validation and CRUD operations.
+- [x] Integrated OCP CAD Viewer for model visualization.  
+- [x] Refactored the repository to **separate concerns**, ensuring scalability.  
+- [x] Implemented hot reload support for Django.  
+- [x] Added **logging and error handling** for STL and STEP exports.  
 
 ---
 
 ## **2. Core Functionality**
 
 ### **a. CAD Pipeline**
-- [x] Design the CAD pipeline structure and flow based on Fx Bricks' example.  
-- [x] Build the first stage of the CAD pipeline (Flemish bond tile generation).  
-- [ ] Modify the pipeline to pull component parameters dynamically from the database.  
-- [ ] Implement caching for intermediate solids (e.g., chairs, timbers) in the pipeline.  
-- [ ] Optimize the pipeline to minimize redundant computations (e.g., bounding box caching).
+- [x] Designed the **CAD pipeline structure** based on modular helpers.  
+- [x] Built the first **dynamic tile generation pipeline**.  
+- [x] Fully **modularized tile generation** to support multiple patterns.  
+- [x] Implemented **brick placement logic** supporting Flemish bond pattern.  
+- [x] Made the pipeline **YAML-configurable**, eliminating hardcoded values.  
+- [x] Refactored **brick generation into helper functions**.  
+- [x] Implemented **dynamic row repetition** and configurable offsets.  
+- [x] Added support for **bond pattern selection** (e.g., Flemish, stretcher).  
+- [x] Ensured tile export functionality works with **multiple formats**.  
+- [ ] Extend support for **additional tile patterns** (e.g., running bond).  
+- [ ] Optimize placement logic to **support irregular patterns**.  
+- [ ] Implement **tile caching** to avoid redundant computations.  
 
 ### **b. Database Integration**
-- [ ] Define and migrate minimal database models for chairs, timbers, and tracks.  
-- [ ] Enable the pipeline to query these models for parameters.  
-- [ ] Log pipeline exports (e.g., STEP/STL files) to track performance.  
+- [ ] Define and migrate **database models** for:
+  - Tile types (bricks, track, future additions).
+  - Component storage (chairs, timbers, sleepers).
+  - STL/STEP **export logs**.
+- [ ] Enable the CAD pipeline to **query the database** for parameters dynamically.  
+- [ ] Implement **admin controls** to manage tile configurations via Django Admin.  
+- [ ] Store **export metadata** (e.g., dimensions, file paths) for tracking.  
 
 ### **c. Geometry and STL Export**
-- [x] Created a Flemish bond tile script with STEP/STL export.  
-- [x] Integrated export paths using Django's `MEDIA_ROOT`.  
-- [ ] Expand pipeline to log metadata for each export (e.g., dimensions, filename).  
-- [ ] Validate STL integrity and provide feedback during export.
+- [x] Created a **unified STL/STEP export function** in file helpers.  
+- [x] Integrated **Django’s MEDIA_ROOT** for file storage.  
+- [x] Added **logging for exports** to track success and failures.  
+- [ ] Validate **exported STL/STEP files** for potential errors.  
+- [ ] Optimize STL export for **reduced file size and improved mesh quality**.  
 
 ---
 
-## **3. Testing**
-- [ ] Write basic tests for the database models to ensure they support the CAD pipeline.  
-- [ ] Validate edge cases (e.g., missing or invalid parameters).  
-- [ ] Test performance of the caching mechanism for intermediate solids.  
+## **3. API Development**
+
+### **a. Core API Enhancements**
+- [x] Implemented Django Ninja for **fast, schema-based API endpoints**.  
+- [x] Created **tile generator API** for triggering tile creation.  
+- [x] Created API endpoints for **tile configuration retrieval**.  
+- [x] Implemented **file download API** for retrieving exported STL/STEP files.  
+- [ ] Add **query parameters** to adjust tile generation dynamically.  
+- [ ] Implement API endpoint for **uploading custom YAML configurations**.  
+
+### **b. API Testing & Documentation**
+- [x] Integrated **Django Ninja’s Swagger UI** for API documentation.  
+- [x] Updated API docs to reflect **new dynamic tile functionality**.  
+- [x] Added example requests for **tile generation and file downloads**.  
+- [ ] Ensure all API endpoints return **consistent, structured responses**.  
+- [ ] Implement **unit tests for API endpoints** using pytest.  
 
 ---
 
-## **4. Documentation**
-- [x] Updated README with new goals, framework, and setup instructions.  
-- [x] Added detailed documentation for the Flemish bond tile script.  
-- [x] Updated API documentation to include Django Ninja integration.  
-- [ ] Document the CAD pipeline's interaction with the database.  
-- [ ] Add examples showing how the pipeline queries and generates components.
+## **4. Testing & Validation**
+- [x] Wrote **unit tests for tile generation functions**.  
+- [x] Validated YAML parsing logic with **various configurations**.  
+- [x] Ensured **correct placement logic** for Flemish bond pattern.  
+- [ ] Test **STL/STEP integrity** before export.  
+- [ ] Validate **performance impact** of large tile generations.  
 
 ---
 
-## **5. Deployment**
-- [ ] Test the application in a fully Dockerized environment with Celery and Redis.  
-- [ ] Document the deployment steps, including environment variables and service orchestration.
+## **5. Documentation**
+- [x] Updated README with **new framework details** and workflow explanations.  
+- [x] Added **detailed YAML configuration documentation**.  
+- [x] Documented the **tile generator workflow** for better maintainability.  
+- [x] Updated API documentation to reflect **new endpoints and improvements**.  
+- [ ] Add a **FAQ section** for common errors and troubleshooting.  
 
 ---
 
-## **6. Future Enhancements**
-- [x] Removed FastAPI-specific tasks and migrated them to Django Ninja.  
-- [ ] Extend the pipeline to support advanced features (e.g., turnouts, curves).  
-- [ ] Explore role-based access control (RBAC) for multi-user workflows.  
+## **6. Deployment & CI/CD**
+- [ ] Test the application in a fully **Dockerized production environment**.  
+- [ ] Integrate **Celery + Redis** for background task processing.  
+- [ ] Automate file exports to a **centralized file storage** for retrieval.  
+- [ ] Document **deployment steps and best practices**.  
 
 ---
 
-### **Short-Term Priorities**
-1. **Database Integration**:
-   - Finalize minimal models for chairs, timbers, and tracks.
-   - Make the pipeline query these models for its inputs.
-2. **Pipeline Optimization**:
-   - Add caching for reusable components and subassemblies.
-   - Log and store intermediate solid metadata in the database.
-3. **Testing and Validation**:
-   - Ensure the pipeline functions correctly with real database inputs.
+## **7. Future Enhancements**
+- [ ] Extend the pipeline to **support non-brick tiles** (e.g., plain tracks).  
+- [ ] Explore implementing **role-based access control (RBAC)**.  
+- [ ] Add **real-time progress updates** for tile generation.  
+- [ ] Optimize large-scale STL/STEP **generation for efficiency**.  
 
 ---
 
-Does this align with your current priorities? Let me know if you’d like to add or revise any tasks! 🚀
+### **Immediate Priorities**
+1. **Database Integration**
+   - Implement models for storing tile configurations and STL/STEP logs.
+   - Enable querying the database for dynamic tile generation parameters.
+2. **Pipeline Optimization**
+   - Introduce caching for intermediate solids.
+   - Improve performance by reducing redundant tile generation steps.
+3. **API Enhancements**
+   - Implement query parameters for dynamic tile adjustments.
+   - Allow **custom YAML uploads** for flexible tile generation.

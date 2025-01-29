@@ -1,151 +1,194 @@
-Here’s the updated **API Design Document** with **Django Ninja** incorporated into the existing architecture:
+### **Updated API Documentation for Dynamic Tile Generation System**
+
+This update **fully aligns** with the **refactored directory structure, helper functions, and YAML-based tile configurations**. 
 
 ---
 
-# **API Design Document for Hybrid REST and Async API**
+# **API Design Document for Dynamic Tile Generation**
 
 ## **Introduction**
-This document outlines the design for a hybrid API combining **Django Ninja**, Django REST Framework (DRF), and Django Async capabilities. The API is designed to handle CRUD operations, asynchronous tasks like STL file generation, and support multiple concurrent users efficiently.
+This API provides **a flexible and scalable system** for generating 3D model tiles dynamically. Using **Django Ninja**, the API allows users to:
+- **Configure tile parameters using YAML files.**
+- **Generate 3D models of different tile types (e.g., bricks, tracks).**
+- **Export tiles in multiple formats (STEP, STL).**
+- **Retrieve and modify YAML configurations.**
+
+The system is modular and supports adding **new tile types** without significant refactoring.
 
 ---
 
-## **Goals**
-1. Provide robust CRUD operations for managing track components (e.g., tracks, timbers, chairs).
-2. Support high-performance asynchronous endpoints for computationally intensive tasks like STL generation.
-3. Ensure scalability to accommodate multiple concurrent users.
-4. Maintain simplicity and compatibility for developers and users.
-5. Allow for seamless integration with third-party tools and monitoring systems.
+## **API Overview**
+- **Framework:** Django Ninja (Fast, schema-based API framework).
+- **Authentication:** JWT-based authentication for secure interactions.
+- **File Management:** Supports STEP/STL file generation and caching.
+- **Scalability:** Uses helper functions for modular and extendable logic.
 
 ---
 
-## **Core Features**
+## **1. Tile Generation Endpoints**
+These endpoints handle **tile creation, export, and retrieval**.
 
-### **1. User Management**
-- **Endpoints**:
-  - `POST /api/register/`: Register new users.
-  - `POST /api/login/`: Authenticate users and return tokens (JWT).
-  - `GET /api/profile/`: Retrieve user profile information.
-  - `PUT /api/profile/`: Update user information.
-
-- **Key Points**:
-  - Use Django's built-in `User` model with custom extensions.
-  - JWT-based authentication for secure and stateless interactions.
-
----
-
-### **2. Track and Component Management**
-- **Endpoints** (Implemented with **Django Ninja**):
-  - `GET /api/tracks/`: List all tracks.
-  - `POST /api/tracks/`: Create new track configurations.
-  - `GET /api/tracks/{id}/`: Retrieve details of a specific track.
-  - `PUT /api/tracks/{id}/`: Update an existing track.
-  - `DELETE /api/tracks/{id}/`: Delete a track.
-
-- **Key Points**:
-  - CRUD operations are now implemented using Django Ninja's type-safe schema-based endpoints.
-  - Support for filtering, pagination, and schema validation.
+### **1.1 Generate Tile**
+- **`POST /api/tiles/generate/`**
+- **Description:** Generates a tile using a YAML configuration file.
+- **Request Body (JSON):**
+  ```json
+  {
+    "tile_type": "bricks",
+    "config_file": "flemish_brick.yaml"
+  }
+  ```
+- **Response (JSON):**
+  ```json
+  {
+    "message": "Tile generation started",
+    "task_id": "12345abcde"
+  }
+  ```
+- **Notes:** 
+  - Supports `bricks`, `plain_track`, and other **registered tile types**.
+  - Configuration files must be **uploaded** before generating.
 
 ---
 
-### **3. STL Generation**
-- **Endpoints**:
-  - `POST /api/stl/generate/`: Initiate STL generation with track parameters.
-  - `GET /api/stl/status/{task_id}/`: Check the status of the generation task.
-  - `GET /api/stl/download/{file_id}/`: Download the generated STL file.
-
-- **Key Points**:
-  - Use Django Ninja for clean schema validation and asynchronous support.
-  - Offload intensive tasks to Celery workers.
-  - Provide secure and time-limited download links for STL files.
+### **1.2 Download Tile**
+- **`GET /api/tiles/download/{file_id}/`**
+- **Description:** Retrieve an exported tile (STEP or STL).
+- **Response:** Returns the file as an attachment.
 
 ---
 
-### **4. STL Download Logging**
-- **Endpoints**:
-  - `GET /api/downloads/`: List user-specific download history.
-  - `DELETE /api/downloads/{id}/`: Delete a specific log entry.
-
-- **Key Points**:
-  - Use Django Ninja's schema capabilities for validating and returning detailed log records.
-  - Maintain an audit trail for downloads and user activity.
-
----
-
-## **Architecture Overview**
-
-### **Django Ninja Integration**
-- **Django Ninja**: A modern schema-based framework for defining type-safe REST APIs.
-  - Combines well with Django Async views and Celery tasks.
-  - Reduces boilerplate while improving maintainability and documentation.
-
-### **Hybrid Approach**
-- **Django Ninja**: Handles all CRUD operations, validation, and schema generation.
-- **Django Async Views**: Implemented for endpoints requiring high concurrency (e.g., STL generation).
-- **Celery with Redis**: Manages long-running or computationally intensive tasks like STL generation.
+### **1.3 List Available Tiles**
+- **`GET /api/tiles/`**
+- **Description:** Returns a list of previously generated tiles.
+- **Response (JSON):**
+  ```json
+  [
+    {
+      "file_id": "xyz123",
+      "tile_type": "bricks",
+      "file_path": "/media/resources/tiles/v2.0/flemish_brick.step"
+    }
+  ]
+  ```
 
 ---
 
-## **Request-Response Flow**
+## **2. Configuration Management**
+These endpoints **manage and modify YAML tile configurations**.
 
-### **Example: STL Generation Workflow**
-1. **Initiate Task**:
-   - Client sends a `POST` request to `/api/stl/generate/` with track parameters.
-   - Django Ninja validates inputs and queues the task using Celery.
-   - Response includes a `task_id` for tracking.
-
-2. **Check Status**:
-   - Client sends a `GET` request to `/api/stl/status/{task_id}/`.
-   - The API checks the task status in Redis and responds with `pending`, `in-progress`, or `completed`.
-
-3. **Download File**:
-   - Upon task completion, a secure file URL is generated.
-   - Client downloads the file using `/api/stl/download/{file_id}/`.
+### **2.1 List Available Configurations**
+- **`GET /api/configs/`**
+- **Description:** Lists all stored YAML configurations.
+- **Response (JSON):**
+  ```json
+  [
+    "flemish_brick.yaml",
+    "plain_track.yaml"
+  ]
+  ```
 
 ---
 
-## **Authentication**
-- **JWT Authentication**:
-  - Used for all endpoints to ensure secure and stateless communication.
-  - Tokens expire after a set period and require renewal.
+### **2.2 Retrieve a Specific Configuration**
+- **`GET /api/configs/{config_name}/`**
+- **Description:** Fetches the content of a given YAML file.
+- **Response (YAML as JSON):**
+  ```json
+  {
+    "tile_type": "bricks",
+    "brick_length": 250,
+    "brick_width": 120
+  }
+  ```
 
 ---
 
-## **Error Handling**
-1. **Validation Errors**:
-   - Return HTTP 422 with detailed error messages if schema validation fails.
-2. **Authentication Errors**:
-   - Return HTTP 401 for invalid or missing tokens.
-3. **Task Errors**:
-   - Return HTTP 500 with a descriptive message if STL generation fails.
-4. **Rate Limiting**:
-   - Implement rate limits to prevent abuse of high-load endpoints.
+### **2.3 Upload New Configuration**
+- **`POST /api/configs/upload/`**
+- **Description:** Allows users to upload a new YAML tile configuration.
+- **Request Body (YAML File)**
+  ```yaml
+  tile_type: bricks
+  brick_length: 250
+  brick_width: 120
+  ```
+- **Response (JSON):**
+  ```json
+  {
+    "message": "Configuration uploaded successfully",
+    "config_name": "custom_brick.yaml"
+  }
+  ```
 
 ---
 
-## **Monitoring and Logging**
-- **Monitoring Tools**:
-  - Use Prometheus and Grafana for tracking API performance.
-  - Celery Flower for monitoring task status.
-
-- **Logging**:
-  - Maintain detailed logs for API requests and task statuses.
-  - Log errors with sufficient context for debugging.
-
----
-
-## **Future Enhancements**
-1. **GraphQL Integration**:
-   - Add support for GraphQL to provide flexible querying for complex data relationships.
-2. **Advanced STL Configurations**:
-   - Extend STL generation to handle advanced configurations like turnouts and curves.
-3. **Role-Based Access Control (RBAC)**:
-   - Implement RBAC for different user tiers (e.g., admin, premium users).
-4. **Real-Time Updates**:
-   - Introduce WebSocket-based real-time updates for task statuses.
+### **2.4 Modify Existing Configuration**
+- **`PUT /api/configs/{config_name}/`**
+- **Description:** Updates values in an existing YAML file.
+- **Request Body (JSON):**
+  ```json
+  {
+    "brick_length": 300
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Configuration updated successfully"
+  }
+  ```
 
 ---
 
-## **Conclusion**
-This updated API design leverages **Django Ninja** for type-safe and schema-driven REST endpoints, combined with Celery and Django Async for efficient task management. The architecture balances simplicity and scalability, ensuring the system can accommodate both developers' and users' needs.
+## **3. Helper Endpoints**
+These endpoints return **metadata** about the system.
+
+### **3.1 List Supported Tile Types**
+- **`GET /api/helpers/tile-types/`**
+- **Description:** Returns a list of tile types that can be generated.
+- **Response (JSON):**
+  ```json
+  ["bricks", "plain_track"]
+  ```
 
 ---
+
+### **3.2 Get Available Export Formats**
+- **`GET /api/helpers/formats/`**
+- **Description:** Lists supported export formats.
+- **Response (JSON):**
+  ```json
+  ["step", "stl"]
+  ```
+
+---
+
+## **4. API Request-Response Flow**
+Below is a **visual workflow** of how **API requests are processed**.
+
+```plaintext
++----------------------+       +----------------------+       +----------------------+
+|  User Sends Request  | ----> |  Validate YAML File  | ----> |  Generate Tile Model  |
+|  (Generate Tile)     |       |  (Check Format, Keys)|       |  (CadQuery Assembly)  |
++----------------------+       +----------------------+       +----------------------+
+            |                                      |
+            v                                      v
++----------------------+       +----------------------+
+|  Store File in /media/ | --> |  Return File Path  |
++----------------------+       +----------------------+
+```
+
+---
+
+## **5. Authentication & Security**
+- **JWT Authentication**: Used for secure API access.
+- **Rate Limiting**: Prevents abuse of high-load endpoints.
+- **Validation**: Ensures all YAML configurations conform to expected schemas.
+
+---
+
+## **6. Future Enhancements**
+- **WebSocket Integration**: Real-time updates on tile generation progress.
+- **Front-End UI**: Web-based YAML editor for modifying configurations.
+- **Expanded Tile Library**: More patterns and track configurations.

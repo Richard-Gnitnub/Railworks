@@ -1,6 +1,7 @@
 import os
 import sys
 import django
+from ocp_vscode import show_object
 
 # Ensure Python finds `resources/`
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
@@ -42,3 +43,4 @@ export_tile(tile, version="v2.0", tile_type=tile_type, export_formats=config["ex
 print(f"✅ Tile generation and export completed for {tile_type}!")
 
      # Visualize the tile
+show_object(tile, name="Flemish Bond Tile")

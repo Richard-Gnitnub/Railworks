@@ -1,3 +1,5 @@
+tile_type: bricks  # Explicitly define tile type
+
 brick_length: 250
 brick_width: 120
 brick_height: 60

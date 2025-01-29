@@ -1,27 +1,30 @@
 import os
-from cadquery import exporters
 from django.conf import settings
 
-def export_tile(tile, version, tile_type, export_formats):
+def export_tile(tile, version="v2.0", tile_type="brick_tile", export_formats=None):
     """
-    Exports the tile to the specified formats.
-    :param tile: CadQuery Assembly object.
-    :param version: Version string.
-    :param tile_type: Type of tile (e.g., "bricks").
-    :param export_formats: List of export formats.
+    Exports the tile to specified formats in a versioned directory.
     """
+    if export_formats is None:
+        export_formats = ["step", "stl"]
+
     output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", tile_type, f"v{version}")
-    os.makedirs(output_dir, exist_ok=True)
+
+    # ✅ **Ensure `MEDIA_ROOT` exists**
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     for fmt in export_formats:
-        file_path = os.path.join(output_dir, f"{tile_type}_tile_{version}.{fmt}")
+        file_path = os.path.join(output_dir, f"{tile_type}_{version}.{fmt}")
         try:
             if fmt == "step":
+                from cadquery import exporters
                 exporters.export(tile.toCompound(), file_path)
             elif fmt == "stl":
+                from cadquery import exporters
                 exporters.export(tile.toCompound(), file_path)
             else:
                 raise ValueError(f"Unsupported export format: {fmt}")
-            print(f"{fmt.upper()} file exported to: {file_path}")
+            print(f"✅ {fmt.upper()} file exported to: {file_path}")
         except Exception as e:
-            raise RuntimeError(f"Export failed for format {fmt}: {e}")
+            raise RuntimeError(f"❌ Export failed for format {fmt}: {e}")

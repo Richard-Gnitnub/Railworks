@@ -10,5 +10,5 @@ def redirect_to_docs(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),  # Mount the API
-    path("", redirect_to_docs),  # ✅ Redirect "/" to "/api/docs"
+    path("", redirect_to_docs),  # Redirect "/" to "/api/docs"
 ]

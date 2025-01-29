@@ -1,52 +1,17 @@
-from ninja import NinjaAPI, File
-from ninja.files import UploadedFile
-import os
-import yaml
-from resources.configs.yaml_config import load_config, validate_config
-from resources.tiles.flemish_brick_tile_v2 import create_flemish_tile, export_tile
+from ninja import NinjaAPI
 
-api = NinjaAPI()
+# Initialize API instance
+api = NinjaAPI(title="Railworks API", version="2.0", description="API for managing tile generation.")
 
-CONFIG_DIR = "resources/configs"
-
-@api.get("/", tags=["General"])
-def root(request):
+def include_routers():
     """
-    API Root Endpoint - Provides a welcome message and link to documentation.
+    Dynamically import and attach routers to avoid circular imports.
     """
-    return {
-        "message": "Welcome to the Railworks API!",
-        "docs": "/api/docs"
-    }
+    from resources.api.config_api import config_router
+    from resources.api.tile_api import tile_router
 
+    api.add_router("/config/", config_router)
+    api.add_router("/tile/", tile_router)
 
-@api.post("/configs/")
-def upload_config(request, file: UploadedFile = File(...)):
-    """
-    Endpoint to upload a YAML configuration file.
-    """
-    config_path = os.path.join(CONFIG_DIR, file.name)
-    with open(config_path, "wb") as f:
-        f.write(file.read())
-
-    # Validate configuration
-    config = load_config(config_path)
-    validate_config(config)
-    
-    return {"message": "Configuration uploaded successfully!", "config_path": config_path}
-
-
-@api.post("/tiles/generate/")
-def generate_tile(request, config_name: str):
-    """
-    Endpoint to generate a Flemish bond tile.
-    """
-    config_path = os.path.join(CONFIG_DIR, config_name)
-    config = load_config(config_path)
-    validate_config(config)
-
-    # Generate and export tile
-    tile = create_flemish_tile()
-    export_tile(tile)
-
-    return {"message": "Tile generated and exported successfully!"}
+# Attach routers after API instance is created
+include_routers()

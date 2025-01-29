@@ -1,3 +1,7 @@
+"""
+config_helpers.py - Handles loading and validating YAML configurations for different tile types.
+"""
+
 import yaml
 import os
 
@@ -61,7 +65,7 @@ def get_default_config_path(tile_type: str) -> str:
     """
     base_dir = "resources/configs"
     file_paths = {
-        "bricks": os.path.join(base_dir, "bricks/flemish_brick.yaml"),
+        "bricks": os.path.join(base_dir, "bricks/flemish_brick_tile.yaml"),
         "plain_track": os.path.join(base_dir, "tracks/plain_track.yaml"),
     }
 

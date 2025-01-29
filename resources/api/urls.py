@@ -1,4 +1,6 @@
 from django.urls import path
-from resources.api.api import api
+from resources.api import api  # Import main API instance (fixed import loop)
 
-path("", api.urls),
+urlpatterns = [
+    path("", api.urls),  # Mount Django Ninja API
+]

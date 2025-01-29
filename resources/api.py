@@ -1,5 +1,5 @@
 from ninja import Router
-from .tiles.flemish_brick_tile import create_flemish_tile, export_tile
+from .tiles.bricks.flemish_brick import create_flemish_tile, export_tile
 
 router = Router()
 

@@ -1,7 +1,6 @@
 import yaml
 import os
 
-
 def load_config(config_path: str) -> dict:
     """
     Load configuration from a YAML file.
@@ -13,7 +12,6 @@ def load_config(config_path: str) -> dict:
     with open(config_path, "r") as file:
         return yaml.safe_load(file)
 
-
 def validate_config(config: dict, tile_type: str):
     """
     Validate the loaded configuration for required keys based on the tile type.
@@ -24,34 +22,23 @@ def validate_config(config: dict, tile_type: str):
     required_keys = {
         "bricks": [
             "brick_length", "brick_width", "brick_height",
-            "mortar_chamfer",  # Ensure chamfer is validated
+            "mortar_chamfer",
             "row_repetition", "tile_width", "export_formats",
         ],
         "plain_track": [
             "track_length", "track_width", "track_height",
-            "spacing",  # Spacing between sleepers
+            "spacing",
             "export_formats",
         ],
     }
 
-    # Retrieve the required keys for the specified tile type
     keys = required_keys.get(tile_type)
     if not keys:
         raise ValueError(f"Unsupported tile type: {tile_type}")
 
-    # Validate all required keys are present
     for key in keys:
         if key not in config:
             raise ValueError(f"Missing required configuration key: {key}")
-
-
-def list_supported_tile_types() -> list:
-    """
-    Return a list of supported tile types for validation.
-    :return: List of supported tile types.
-    """
-    return ["bricks", "plain_track"]
-
 
 def get_default_config_path(tile_type: str) -> str:
     """

@@ -7,7 +7,7 @@ import os
 import pytest
 import cadquery as cq
 from django.conf import settings
-from resources.tiles.bricks.flemish_brick import (
+from resources.tiles.generate_tile import (
     load_config,
     validate_config,
     create_full_brick_aligned,

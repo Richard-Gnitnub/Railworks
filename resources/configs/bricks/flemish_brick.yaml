@@ -9,7 +9,10 @@ offset_y: 0
 offset_z: 0
 
 row_repetition: 4  # Number of rows per tile
-tile_width: 4 # Number of bricks per row
+tile_width: 4  # Number of bricks per row
+
+# 👇 NEW CONFIGURATION FOR PLACEMENT PATTERN
+bond_pattern: flemish  # Options: "flemish", "stretcher", "stack"
 
 export_formats:
   - step

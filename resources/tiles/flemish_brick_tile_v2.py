@@ -18,6 +18,7 @@ sys.path.append(project_root)
 # Import configuration and tile generation functions
 from resources.helper.file_export import export_tile 
 from resources.configs.yaml_config import load_config, validate_config
+from resources.helper.brick_helper import create_full_brick_aligned, create_half_brick_aligned
 from django.conf import settings
 
 # Configure Django settings
@@ -39,28 +40,11 @@ def validate_tile_parameters():
     if config["tile_width"] <= 0:
         raise ValueError("Tile width (number of bricks per row) must be greater than 0.")
 
-validate_tile_parameters()
+half_brick = create_half_brick_aligned(config)  # 🔥 Ensure config is passed
+full_brick = create_full_brick_aligned(config)  # 🔥 Ensure config is passed
 
-# Geometry creation functions
-def create_full_brick_aligned(length=config["brick_length"], width=config["brick_width"], height=config["brick_height"], chamfer=config["mortar_chamfer"]):
-    """Creates a full-sized brick with chamfered edges to simulate mortar."""
-    brick = (
-        cq.Workplane("XY")
-        .box(length, width, height)
-        .edges("|Z or |X ")  # Select vertical edges
-        .chamfer(chamfer)  # Apply a chamfer to simulate mortar
-    )
-    return brick.translate((length / 2, width / 2, height / 2))
+print(f"Debug: Config being passed to create_half_brick_aligned: {config}")
 
-def create_half_brick_aligned(length=config["brick_length"] / 2, width=config["brick_width"], height=config["brick_height"], chamfer=config["mortar_chamfer"]):
-    """Creates a half-sized brick with chamfered edges to simulate mortar."""
-    brick = (
-        cq.Workplane("XY")
-        .box(length, width, height)
-        .edges("|Z or |X ")  # Select vertical edges
-        .chamfer(chamfer)  # Apply a chamfer to simulate mortar
-    )
-    return brick.translate((length / 2, width / 2, height / 2))
 
 def create_flemish_tile():
     """
@@ -79,9 +63,8 @@ def create_flemish_tile():
     for i in range(row_repetition):
         # Create an assembly for the current row
         row_assembly = cq.Assembly()
-        half_brick = create_half_brick_aligned()
-        full_brick = create_full_brick_aligned()
-
+        half_brick = create_half_brick_aligned(config)  # ✅ Fix here
+        full_brick = create_full_brick_aligned(config)  # ✅ Fix here
         # Step 1: Determine X-offset for the entire row
         row_x_offset = 0
         if i % 2 != 0:  # For even rows only

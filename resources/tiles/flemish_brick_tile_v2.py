@@ -16,9 +16,9 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 sys.path.append(project_root)
 
 # Import configuration and tile generation functions
-from resources.helper.file_export import export_tile 
+from resources.helpers.file_export import export_tile 
 from resources.configs.yaml_config import load_config, validate_config
-from resources.helper.brick_helper import create_full_brick_aligned, create_half_brick_aligned
+from resources.helpers.brick_geometry import create_full_brick_aligned, create_half_brick_aligned
 from django.conf import settings
 
 # Configure Django settings

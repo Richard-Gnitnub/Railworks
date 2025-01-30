@@ -9,7 +9,11 @@ offset_y: 0
 offset_z: 0
 
 row_repetition: 4  # Number of rows per tile
-tile_width: 4 # Number of bricks per row
+tile_width: 4  # Number of bricks per row
+
+bond_pattern: flemish  # Options: "flemish", "stretcher", "stack"
+
+file_name: "custom_brick_tile_test"  # 👈 Dynamically set file name here
 
 export_formats:
   - step

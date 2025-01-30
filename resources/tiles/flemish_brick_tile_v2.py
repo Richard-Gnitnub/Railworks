@@ -16,6 +16,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 sys.path.append(project_root)
 
 # Import configuration and tile generation functions
+from resources.helper.file_export import export_tile 
 from resources.configs.yaml_config import load_config, validate_config
 from django.conf import settings
 
@@ -119,31 +120,8 @@ def create_flemish_tile():
     return tile_assembly
 
 
-def export_tile(tile, version="v2.0"):
-    """
-    Exports the tile to specified formats in a versioned directory.
-    """
-    output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", f"v{version}")
-    os.makedirs(output_dir, exist_ok=True)
-
-    export_formats = config.get("export_formats", ["step", "stl"])
-    for fmt in export_formats:
-        file_path = os.path.join(output_dir, f"flemish_tile_{version}.{fmt}")
-        try:
-            if fmt == "step":
-                exporters.export(tile.toCompound(), file_path)
-            elif fmt == "stl":
-                exporters.export(tile.toCompound(), file_path)
-            else:
-                raise ValueError(f"Unsupported export format: {fmt}")
-            print(f"{fmt.upper()} file exported to: {file_path}")
-        except Exception as e:
-            raise RuntimeError(f"Export failed for format {fmt}: {e}")
-
 # Main execution
 if __name__ == "__main__":
-    # Create and visualize the tile
     tile = create_flemish_tile()
-    show_object(tile, name="Flemish Bond Tile V2")  # Visualize the tile in OCP Viewer
-    # Export the tile
-    export_tile(tile)
+    show_object(tile, name=config["file_name"])  # 👈 Dynamically names the model in viewer
+    export_tile(tile, config, version="v2.0", cache_results=True)  # 🔥 Uses YAML file_name

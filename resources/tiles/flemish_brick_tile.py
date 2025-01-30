@@ -112,33 +112,6 @@ def create_flemish_tile():
     return wall_assembly
 
 
-def export_tile(tile, version="v1.0"):
-    """
-    Exports the tile to STEP and STL files in a versioned directory.
-    """
-    output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", f"v{version}")
-
-    # Ensure directory exists
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Validate that the tile has valid geometry
-    if not tile.children:
-        raise ValueError("No shapes found to export. Tile is empty.")
-
-    try:
-        # File paths
-        step_file_path = os.path.join(output_dir, f"flemish_tile_{version}.step")
-        stl_file_path = os.path.join(output_dir, f"flemish_tile_{version}.stl")
-
-        # Export files
-        exporters.export(tile.toCompound(), step_file_path)
-        exporters.export(tile.toCompound(), stl_file_path)
-
-        print(f"STEP file exported to: {step_file_path}")
-        print(f"STL file exported to: {stl_file_path}")
-    except Exception as e:
-        raise RuntimeError(f"Export failed: {e}")
-
 
 # Main execution
 if __name__ == "__main__":

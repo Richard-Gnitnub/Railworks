@@ -16,10 +16,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 sys.path.append(project_root)
 
 # Import configuration and tile generation functions
-from cad_pipeline.cad_engine.export_handler import export_tile 
+from cad_engine.export_handler import export_tile 
 from cad_pipeline.configs.yaml_config import load_config, validate_config
-from cad_pipeline.cad_engine.helpers.brick_geometry import create_full_brick_aligned, create_half_brick_aligned,config_to_tuple
-from cad_pipeline.cad_engine.helpers.assemble_brick_tile import assemble_brick_tile
+from cad_engine.helpers.brick_geometry import create_full_brick_aligned, create_half_brick_aligned,config_to_tuple
+from cad_engine.helpers.assemble_brick_tile import assemble_brick_tile
 from django.conf import settings
 
 # Configure Django settings
@@ -27,7 +27,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "railworks_project.settings")
 django.setup()
 
 # Load and validate configuration
-config_path = os.path.join(project_root, "resources/configs/default_config_v2.yaml")
+config_path = os.path.join(project_root, "cad_pipeline/configs/config_v2.yaml")
 config = load_config(config_path)
 validate_config(config)
 

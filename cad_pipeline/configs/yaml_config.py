@@ -1,7 +1,7 @@
 import yaml
 import os
 
-def load_config(config_path="resources/configs/default_config_v2.yaml"):
+def load_config(config_path="cad_pipeline/configs/config_v2.yaml"):
     """
     Load configuration from a YAML file.
     :param config_path: Path to the YAML configuration file.

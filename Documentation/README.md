@@ -42,6 +42,51 @@ dev2/
 │   │   │   │   ├── flemish_tile_v1.0.step
 │   │   │   │   ├── flemish_tile_v1.0.stl
 ├── manage.py                     # Django management script
+
+
+
+
+/cad_pipeline
+│
+├── /cad_engine              # Core CAD logic
+│   ├── generator.py         # Master function for CAD model generation
+│   ├── model_loader.py      # Loads models from DB
+│   ├── export_handler.py    # Unified export logic (STEP/STL/GLTF)
+│   ├── cache_manager.py     # Caches reusable components
+│   ├── /tiles               # TILE GENERATION MODULE
+│   │   ├── tile_generator.py   # Unified tile creation logic
+│   │   ├── flemish_brick.py   # Specific pattern logic
+│   │   ├── stretcher_bond.py   # Other patterns
+│
+├── /models                  # Modular CAD components
+│   ├── /assemblies          # Organized by category
+│   │   ├── /walls           # Wall-related assemblies
+│   │   │   ├── wall_generator.py   # Full wall generation logic
+│   │   │   ├── cutouts.py          # Handles openings (doors/windows)
+│   │   ├── /track           # Track-related assemblies
+│   │   │   ├── bullhead_track.py
+│   │   │   ├── turnout.py
+│   │   ├── /buildings       # Buildings & structures
+│   │   │   ├── signal_box.py
+│   │   │   ├── platform_shelter.py
+│   │   │   ├── station_building.py
+│
+├── /cad_engine/helpers       # Centralized helpers
+│   ├── brick_geometry.py    # Handles 3D brick creation
+│   ├── brick_placement.py   # Handles brick placement (Flemish, Stretcher, etc.)
+│   ├── door_cutout.py       # Handles Boolean cutouts for doors/windows
+│   ├── caching.py           # Cache utilities for models
+│
+├── /database                # Database models & migrations
+│
+├── /api                     # API for requesting CAD models
+│
+└── /tests                   # Unit tests
+
+
+
+
+
 ```
 
 ---
@@ -107,6 +152,70 @@ The **CAD pipeline** is designed to handle dynamic parameterized inputs, reusabl
 | - Log Metadata            |
 +---------------------------+
 ```
+---
+## Caching Strategy
+
+```
++-------------------------------+
+| User Requests Tile Generation |
++-------------------------------+
+            |
+            v
++-------------------------------+
+| Generate Cache Key (Hash)     |
++-------------------------------+
+            |
+        (Check Cache)
+        /         \
+      Yes         No
+     /             \
+Retrieve        Generate CAD Model
+From Cache      (Only if Necessary)
+     \             /
+      \           /
+  +-----------------------+
+  | Serve Model to User   |
+  +-----------------------+
+
+```
+## Cache Plan
+
+```
+
++------------------------------+
+| User Requests Model via API  |
++------------------------------+
+            |
+            v
++-------------------------------+
+| Check Memcached for Model     |  <-- 🔹 If cached, return instantly
++-------------------------------+
+    |                |
+    | Cache Hit      | Cache Miss
+    |                v
+    |        +--------------------------+
+    |        | Generate CAD Model (API) |
+    |        +--------------------------+
+    |                      |
+    v                      v
++-----------------+     +---------------------------------+
+| Cache Model URL | <-- | Upload to Secure Storage (S3) |
++-----------------+     +---------------------------------+
+            |
+            v
++---------------------------+
+| Serve Secure Signed URL   |  <-- 🔹 File expires after short period
++---------------------------+
+
+Final Security and Performance Strategy
+Component	Technology	Purpose
+Fast CAD model retrieval	Memcached	Reduces unnecessary recomputation
+Secure file storage	AWS S3 / MinIO (private bucket)	Prevents direct file exposure
+Access control	JWT authentication	Ensures only authorized users request models
+Cache expiry handling	Memcached TTL & manual invalidation	Prevents stale results
+Scalability	Docker + Kubernetes (future-ready)	Allows handling large-scale requests
+
+```
 
 ---
 
@@ -139,7 +248,9 @@ The project integrates **Django Ninja** for fast, type-safe API development. Key
 
 ## **Setup**
 
-1. Install dependencies:
+1. Clone this repository
+
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```

@@ -1,5 +1,5 @@
 import cadquery as cq
-from resources.helpers.brick_geometry import (
+from cad_engine.helpers.brick_geometry import (
     create_full_brick_aligned, create_half_brick_aligned, config_to_tuple
 )
 

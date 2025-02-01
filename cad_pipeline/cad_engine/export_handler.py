@@ -12,7 +12,7 @@ def export_tile(tile, config, version="v2.0", cache_results=False):
     tile_type = config.get("tile_type", "bricks")  # Defaults to bricks if not specified
     file_name = config.get("file_name", f"{tile_type}_tile")  # Uses default if not in YAML
 
-    output_dir = os.path.join(settings.MEDIA_ROOT, "resources", "tiles", tile_type, f"v{version}")
+    output_dir = os.path.join(settings.MEDIA_ROOT, "cad_pipeline", "tiles", tile_type, f"v{version}")
     os.makedirs(output_dir, exist_ok=True)
 
     cache = {}

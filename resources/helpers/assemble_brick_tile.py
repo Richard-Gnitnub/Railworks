@@ -28,7 +28,7 @@ def assemble_brick_tile(config):
 
         row_x_offset = 0
         if bond_pattern == "flemish" and i % 2 != 0:
-            row_x_offset = -config["brick_length"] / 2  # Align half-brick centre
+            row_x_offset = -config["brick_length"] / 1.5  # Align half-brick centre
 
         x_offset = row_x_offset
 

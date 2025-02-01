@@ -16,10 +16,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 sys.path.append(project_root)
 
 # Import configuration and tile generation functions
-from resources.helpers.file_export import export_tile 
-from resources.configs.yaml_config import load_config, validate_config
-from resources.helpers.brick_geometry import create_full_brick_aligned, create_half_brick_aligned,config_to_tuple
-from resources.helpers.assemble_brick_tile import assemble_brick_tile
+from cad_pipeline.cad_engine.export_handler import export_tile 
+from cad_pipeline.configs.yaml_config import load_config, validate_config
+from cad_pipeline.cad_engine.helpers.brick_geometry import create_full_brick_aligned, create_half_brick_aligned,config_to_tuple
+from cad_pipeline.cad_engine.helpers.assemble_brick_tile import assemble_brick_tile
 from django.conf import settings
 
 # Configure Django settings

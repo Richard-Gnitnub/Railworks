@@ -11,7 +11,7 @@ class AssemblySchema(Schema):
     created_at: str
 
     class Config:
-        schema_extra = {
+        json_extra = {
             "example": {
                 "id": 1,
                 "name": "Warehouse Wall 3m x 2m",
@@ -33,7 +33,7 @@ class ErrorResponse(Schema):
     error: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "error": "Assembly not found"
             }

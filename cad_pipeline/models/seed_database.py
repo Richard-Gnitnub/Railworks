@@ -1,14 +1,16 @@
-import django
 import os
+import django
 
-# Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "railworks_project.settings")  # Update to match your project
-django.setup()
+# ✅ Ensure Django settings are loaded before imports
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "railworks_project.settings")
+django.setup()  # ✅ Initialize Django
 
-from cad_pipeline.models import NMRAStandard, Parameter, Assembly
+# ✅ Import models AFTER Django setup
+from cad_pipeline.models.nmra_standard import NMRAStandard
+from cad_pipeline.models.parameter import Parameter
 
 def seed_nmra_standards():
-    """Populates NMRAStandard model with predefined gauge data."""
+    """Populates the NMRAStandard model with predefined gauge data."""
     nmra_data = [
         {"name": "HO Scale", "scale_ratio": 87.1, "gauge_mm": 16.5, "clearance_mm": {"min_height": 50, "min_width": 30}, "rail_profile": "Code 75 Bullhead"},
         {"name": "O Scale", "scale_ratio": 48.0, "gauge_mm": 32.0, "clearance_mm": {"min_height": 70, "min_width": 50}, "rail_profile": "Code 100 Flat Bottom"},
@@ -23,7 +25,7 @@ def seed_nmra_standards():
             print(f"🔄 NMRA Standard {nmra['name']} already exists. Skipping...")
 
 def seed_parameters():
-    """Populates Parameter model with configurable values."""
+    """Populates the Parameter model with configurable values."""
     parameters = [
         {"name": "flemish", "value": "Flemish Bond", "parameter_type": "bond_pattern"},
         {"name": "stretcher", "value": "Stretcher Bond", "parameter_type": "bond_pattern"},
@@ -41,33 +43,8 @@ def seed_parameters():
         else:
             print(f"🔄 Parameter {param['name']} already exists. Skipping...")
 
-def seed_tile_generator_settings():
-    """Populates Assembly model with tile generator settings."""
-    tile_metadata = {
-        "brick_length": 250,
-        "brick_width": 120,
-        "brick_height": 60,
-        "mortar_chamfer": 5,
-        "offset_x": 0,
-        "offset_y": 0,
-        "offset_z": 0,
-        "row_repetition": 4,
-        "tile_width": 4,
-        "bond_pattern": "flemish",
-        "file_name": "stretcher_v1",
-        "export_formats": ["step", "stl"],
-    }
-
-    obj, created = Assembly.objects.get_or_create(name="stretcher_v1", model_type="tile", defaults={"metadata": tile_metadata})
-
-    if created:
-        print(f"✅ Added Tile Configuration: {obj.name}")
-    else:
-        print(f"🔄 Tile Configuration {obj.name} already exists. Skipping...")
-
 if __name__ == "__main__":
-    print("🚀 Seeding NMRA Standards, Parameters, and Tile Generator Settings into the database...")
+    print("🚀 Seeding NMRA Standards and Parameters into the database...")
     seed_nmra_standards()
     seed_parameters()
-    seed_tile_generator_settings()
     print("✅ Database seeding complete!")

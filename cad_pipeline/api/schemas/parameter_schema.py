@@ -8,7 +8,7 @@ class ParameterSchema(Schema):
     parameter_type: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "name": "flemish",
@@ -21,7 +21,7 @@ class ErrorResponse(Schema):
     error: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "error": "Parameter not found"
             }

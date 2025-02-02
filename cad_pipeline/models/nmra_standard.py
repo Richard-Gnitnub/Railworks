@@ -1,10 +1,11 @@
 from django.db import models
 
 class NMRAStandard(models.Model):
+    """Stores NMRA gauge and clearance data."""
     name = models.CharField(max_length=50, unique=True)  # "HO Scale"
     scale_ratio = models.FloatField()  # 1:87.1
     gauge_mm = models.FloatField()  # 16.5mm
-    clearance_mm = models.JSONField(default=dict)  # Stores all NMRA-defined clearances
+    clearance_mm = models.JSONField(default=dict)  # Stores NMRA-defined clearances
     rail_profile = models.CharField(max_length=50)  # "Code 75 Bullhead"
 
     def __str__(self):

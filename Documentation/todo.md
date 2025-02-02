@@ -1,7 +1,3 @@
-Here’s the **updated TODO list** based on the refined focus to get the database serving the CAD pipeline:
-
----
-
 # **TODO List**
 
 ## **1. Project Setup**
@@ -9,7 +5,6 @@ Here’s the **updated TODO list** based on the refined focus to get the databas
 - [x] Established Django project and core application structure.  
 - [x] Installed dependencies for Django, CadQuery, and related tools.  
 - [x] Validated new project setup with end-to-end tests (e.g., admin panel accessibility).  
-- [x] Implemented Daisy UI for the admin panel.  
 - [x] Installed and configured DockerCloud for builds.  
 - [x] Setup CI/CD pipeline.  
 - [x] Wrote contribution guidelines.  
@@ -20,29 +15,34 @@ Here’s the **updated TODO list** based on the refined focus to get the databas
 - [x] Installed and tested CadQuery.  
 - [x] Created the Flemish bond tile generation script (`flemish_brick_tile.py`).  
 - [x] Validated the script integration with Django and OCP CAD Viewer.  
-- [x] Added Django Ninja for API schema validation and CRUD operations.
+- [x] Added Django Ninja for API schema validation and CRUD operations.  
+- [x] Installed Memcached for caching.  
 
 ---
 
 ## **2. Core Functionality**
 
 ### **a. CAD Pipeline**
-- [x] Design the CAD pipeline structure and flow based on Fx Bricks' example.  
-- [x] Build the first stage of the CAD pipeline (Flemish bond tile generation).  
+- [x] Designed the CAD pipeline structure and flow based on Fx Bricks' example.  
+- [x] Built the first stage of the CAD pipeline (Flemish bond tile generation).  
 - [ ] Modify the pipeline to pull component parameters dynamically from the database.  
 - [ ] Implement caching for intermediate solids (e.g., chairs, timbers) in the pipeline.  
-- [ ] Optimize the pipeline to minimize redundant computations (e.g., bounding box caching).
+- [ ] Optimize the pipeline to minimize redundant computations (e.g., bounding box caching).  
 
 ### **b. Database Integration**
-- [ ] Define and migrate minimal database models for chairs, timbers, and tracks.  
+- [x] Defined and migrated initial database model for `Assembly`.  
+- [ ] Extend models to include chairs, timbers, and tracks.  
 - [ ] Enable the pipeline to query these models for parameters.  
 - [ ] Log pipeline exports (e.g., STEP/STL files) to track performance.  
 
-### **c. Geometry and STL Export**
+### **c. Admin Views**
+- [ ] Create admin views for managing the `Assembly`, `Chair`, `Timber`, and `Track` models.  
+
+### **d. Geometry and STL Export**
 - [x] Created a Flemish bond tile script with STEP/STL export.  
 - [x] Integrated export paths using Django's `MEDIA_ROOT`.  
 - [ ] Expand pipeline to log metadata for each export (e.g., dimensions, filename).  
-- [ ] Validate STL integrity and provide feedback during export.
+- [ ] Validate STL integrity and provide feedback during export.  
 
 ---
 
@@ -58,13 +58,14 @@ Here’s the **updated TODO list** based on the refined focus to get the databas
 - [x] Added detailed documentation for the Flemish bond tile script.  
 - [x] Updated API documentation to include Django Ninja integration.  
 - [ ] Document the CAD pipeline's interaction with the database.  
-- [ ] Add examples showing how the pipeline queries and generates components.
+- [ ] Add examples showing how the pipeline queries and generates components.  
 
 ---
 
 ## **5. Deployment**
+- [ ] Install and integrate Celery for task management.  
 - [ ] Test the application in a fully Dockerized environment with Celery and Redis.  
-- [ ] Document the deployment steps, including environment variables and service orchestration.
+- [ ] Document the deployment steps, including environment variables and service orchestration.  
 
 ---
 
@@ -77,14 +78,16 @@ Here’s the **updated TODO list** based on the refined focus to get the databas
 
 ### **Short-Term Priorities**
 1. **Database Integration**:
-   - Finalize minimal models for chairs, timbers, and tracks.
-   - Make the pipeline query these models for its inputs.
+   - Extend models for chairs, timbers, and tracks.
+   - Ensure the pipeline queries these models for its inputs.
 2. **Pipeline Optimization**:
    - Add caching for reusable components and subassemblies.
    - Log and store intermediate solid metadata in the database.
-3. **Testing and Validation**:
-   - Ensure the pipeline functions correctly with real database inputs.
-
----
-
-Does this align with your current priorities? Let me know if you’d like to add or revise any tasks! 🚀
+3. **Admin Views**:
+   - Create and refine admin views for all models.
+4. **Task Management**:
+   - Install and configure Celery for task queue management.
+   - Validate Celery integration with Redis and Docker.
+5. **Testing and Validation**:
+   - Validate functionality with database-driven inputs.
+   - Ensure caching improves performance without breaking outputs.

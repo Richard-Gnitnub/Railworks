@@ -11,5 +11,7 @@ class Assembly(models.Model):
     metadata = models.JSONField(default=dict)  # Stores CAD parameters (dimensions, materials)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_deleted = models.BooleanField(default=False)  
+
     def __str__(self):
         return f"{self.model_type}: {self.name}"

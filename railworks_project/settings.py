@@ -63,7 +63,12 @@ TEMPLATES = [
     },
 ]
 
-
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "db_cache_table",  # Name your table; ensure it doesn't clash with other tables
+    }
+}
 
 WSGI_APPLICATION = 'railworks_project.wsgi.application'
 

@@ -1,6 +1,4 @@
-Here is the **final** and **fully comprehensive README**, now including **everything**—the **CAD pipeline workflow**, **database design table**, **API documentation**, and **caching strategy**.  
 
-```markdown
 # **CAD Pipeline for Railworks Project**
 
 ## **Overview**

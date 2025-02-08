@@ -1,5 +1,6 @@
 from ninja import Schema
 from typing import Optional, Dict
+from datetime import datetime
 
 class AssemblySchema(Schema):
     """Defines the response structure for an Assembly object."""
@@ -8,10 +9,10 @@ class AssemblySchema(Schema):
     model_type: str
     nmra_standard_id: Optional[int]  # ForeignKey to NMRAStandard
     metadata: Dict  # JSONField in Django
-    created_at: str
+    created_at: datetime
 
     class Config:
-        json_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "name": "Warehouse Wall 3m x 2m",
@@ -25,6 +26,32 @@ class AssemblySchema(Schema):
                     "bond_pattern": "flemish"
                 },
                 "created_at": "2025-02-02T12:00:00Z"
+            }
+        }
+
+class CachedAssemblyResponse(Schema):
+    """Defines the response when serving from cache."""
+    source: str  # Indicates whether it's from cache or database
+    assembly: AssemblySchema
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "source": "cache",
+                "assembly": {
+                    "id": 1,
+                    "name": "Warehouse Wall 3m x 2m",
+                    "model_type": "wall",
+                    "nmra_standard_id": 1,
+                    "metadata": {
+                        "brick_length": 250,
+                        "brick_width": 120,
+                        "brick_height": 60,
+                        "mortar_chamfer": 5,
+                        "bond_pattern": "flemish"
+                    },
+                    "created_at": "2025-02-02T12:00:00Z"
+                }
             }
         }
 

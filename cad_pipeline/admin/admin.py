@@ -22,11 +22,15 @@ class SoftDeleteAdmin(admin.ModelAdmin):
 
 # Register models
 @admin.register(Assembly)
-class AssemblyAdmin(SoftDeleteAdmin):
-    list_display = ("id", "name", "model_type", "nmra_standard", "is_deleted", "created_at")
-    list_filter = ("model_type", "is_deleted")
+class AssemblyAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "model_type", "get_nmra_standard", "is_deleted", "created_at")  # Fix field references
+    list_filter = ("model_type", "is_deleted")  # Ensure `is_deleted` is correctly referenced
     search_fields = ("name", "metadata")
 
+    def get_nmra_standard(self, obj):
+        """Ensure proper reference to NMRA Standard."""
+        return obj.nmra_standard.name if obj.nmra_standard else "N/A"
+    get_nmra_standard.short_description = "NMRA Standard"
 
 @admin.register(ExportedFile)
 class ExportedFileAdmin(admin.ModelAdmin):

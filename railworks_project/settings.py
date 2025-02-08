@@ -1,8 +1,5 @@
 from pathlib import Path
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import os
 
@@ -127,17 +124,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-sentry_sdk.init(
-    dsn="https://b0cf98fc2cafcc0ab276bbaccd312783@o4508557199605760.ingest.de.sentry.io/4508557385793616",
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=0.5,  # Capture 50% of transactions for performance monitoring
-    _experiments={
-        # Enable continuous profiling for in-depth performance insights
-        "continuous_profiling_auto_start": True,
-    },
-)
 
 LOGGING = {
     "version": 1,

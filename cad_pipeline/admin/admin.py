@@ -1,7 +1,6 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 from cad_pipeline.models.assembly import Assembly
-from cad_pipeline.models.parameter import Parameter
 from cad_pipeline.models.exported_file import ExportedFile
 
 @admin.register(Assembly)
@@ -13,15 +12,6 @@ class AssemblyAdmin(MPTTModelAdmin):
     search_fields = ("name", "type")
     list_filter = ("type",)
     ordering = ("name",)
-
-@admin.register(Parameter)
-class ParameterAdmin(admin.ModelAdmin):
-    """
-    Allows management of parameters.
-    """
-    list_display = ("assembly", "key", "value")
-    search_fields = ("key", "value")
-    list_filter = ("assembly",)
 
 @admin.register(ExportedFile)
 class ExportedFileAdmin(admin.ModelAdmin):

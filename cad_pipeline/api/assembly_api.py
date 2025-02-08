@@ -6,88 +6,80 @@ from cad_pipeline.api.schemas.assembly_schema import AssemblySchema, ErrorRespon
 
 router = Router(tags=["Assemblies"])
 
-# ✅ Retrieve a Single Assembly (Cache Enabled)
 @router.get("/assembly/{id}/", response={200: AssemblySchema, 404: ErrorResponse})
 def get_assembly(request, id: int):
-    """Retrieve a specific assembly, serving from cache when possible."""
+    """
+    Retrieve a specific assembly, serving from cache when possible.
+    Includes handling for soft-deleted records.
+    """
     cache_key = f"assembly:{id}"
-    
     cached_assembly = cache.get(cache_key)
     if cached_assembly:
-        return cached_assembly  # ✅ Serve from cache
-
-    assembly = get_object_or_404(Assembly, id=id)
-
-    # Store the latest version in cache
+        return cached_assembly
+    assembly = get_object_or_404(Assembly.objects.all(), id=id)
+    if assembly.is_deleted:
+        return 404, {"error": "This assembly has been deleted."}
     cache.set(cache_key, assembly, timeout=86400)
     return assembly
 
-# ✅ Retrieve All Assemblies (Optional Model Type Filtering)
 @router.get("/assemblies/", response={200: list[AssemblySchema]})
 def list_assemblies(request, model_type: str = None):
-    """Retrieve all assemblies, optionally filtering by model type."""
-    query = Assembly.objects.filter(is_deleted=False)  # Exclude soft-deleted assemblies
+    """
+    Retrieve all assemblies, optionally filtering by model type.
+    Excludes soft-deleted records.
+    """
+    query = Assembly.objects.filter(is_deleted=False)
     if model_type:
         query = query.filter(model_type=model_type)
-    
     return query
 
-# ✅ Create a New Assembly (Does Not Overwrite)
-@router.post("/assemblies/", response={201: AssemblySchema})
+@router.post("/assemblies/", response={201: AssemblySchema, 400: ErrorResponse})
 def create_assembly(request, payload: AssemblySchema):
-    """Creates a new assembly and caches it immediately."""
+    """
+    Create a new assembly and cache it immediately.
+    Ensures unique names and handles duplicate errors.
+    """
     data = payload.dict(exclude_unset=True)
-
-    # Ensure a new unique assembly is created
+    if Assembly.objects.filter(name=data["name"], is_deleted=False).exists():
+        return 400, {"error": "An assembly with this name already exists."}
     assembly = Assembly.objects.create(
         name=data["name"],
         model_type=data["model_type"],
         nmra_standard=data.get("nmra_standard"),
         metadata=data.get("metadata", {}),
     )
-
-    # ✅ Cache the new assembly
     cache_key = f"assembly:{assembly.id}"
     cache.set(cache_key, assembly, timeout=86400)
+    return 201, assembly
 
-    return assembly  # ✅ Returns HTTP 201 Created
-
-# ✅ Update an Existing Assembly (Increment Version)
 @router.put("/assembly/{id}/", response={200: AssemblySchema, 404: ErrorResponse})
 def update_assembly(request, id: int, payload: AssemblySchema):
-    """Updates an existing assembly, increments version if metadata changes, and updates cache."""
-    assembly = get_object_or_404(Assembly, id=id)
+    """
+    Update an existing assembly and update cache.
+    If metadata changes, the model's save() will handle version incrementation.
+    """
+    assembly = get_object_or_404(Assembly.objects.all(), id=id)
+    if assembly.is_deleted:
+        return 404, {"error": "This assembly has been deleted."}
 
-    updated_fields = []
-    for attr, value in payload.dict().items():
+    for attr, value in payload.dict(exclude_unset=True).items():
         if getattr(assembly, attr) != value:
             setattr(assembly, attr, value)
-            updated_fields.append(attr)
-
-    if "metadata" in updated_fields:
-        assembly.version += 1  # ✅ Increment version only if metadata changed
-
-    assembly.save(update_fields=updated_fields + ["version", "updated_at"])
-
-    # ✅ Invalidate and update cache
+    assembly.save()  # Let the model's save() handle version and cache updates.
     cache_key = f"assembly:{id}"
-    cache.delete(cache_key)
     cache.set(cache_key, assembly, timeout=86400)
+    return assembly
 
-    return assembly  # ✅ Returns HTTP 200 OK
-
-# ✅ Soft Delete an Assembly (Invalidate Cache)
 @router.delete("/assembly/{id}/", response={204: None, 404: ErrorResponse})
 def delete_assembly(request, id: int):
-    """Soft delete an assembly and remove it from cache."""
-    assembly = get_object_or_404(Assembly, id=id)
-
-    # ✅ Soft delete the record
+    """
+    Soft delete an assembly and remove it from cache.
+    """
+    assembly = get_object_or_404(Assembly.objects.all(), id=id)
+    if assembly.is_deleted:
+        return 404, {"error": "This assembly has already been deleted."}
     assembly.is_deleted = True
-    assembly.save(update_fields=["is_deleted"])
-
-    # ✅ Invalidate cache
+    assembly.save(update_fields=["is_deleted", "updated_at"])
     cache_key = f"assembly:{id}"
     cache.delete(cache_key)
-
-    return None  # ✅ Returns HTTP 204 No Content
+    return None

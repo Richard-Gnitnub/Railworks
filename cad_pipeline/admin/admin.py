@@ -1,62 +1,33 @@
 from django.contrib import admin
+from mptt.admin import MPTTModelAdmin
 from cad_pipeline.models.assembly import Assembly
-from cad_pipeline.models.exported_file import ExportedFile
-from cad_pipeline.models.nmra_standard import NMRAStandard
 from cad_pipeline.models.parameter import Parameter
+from cad_pipeline.models.exported_file import ExportedFile
 
-# Optional: Define a base admin for soft-deletable models
-class SoftDeleteAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "is_deleted", "created_at")
-    list_filter = ("is_deleted",)
-    search_fields = ("name",)
-    actions = ["restore_records"]
-
-    def get_queryset(self, request):
-        """Exclude soft-deleted records by default"""
-        return super().get_queryset(request).filter(is_deleted=False)
-
-    @admin.action(description="Restore selected records")
-    def restore_records(self, request, queryset):
-        queryset.update(is_deleted=False)
-
-
-# Register models
 @admin.register(Assembly)
-class AssemblyAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "model_type", "get_nmra_standard", "is_deleted", "created_at")  # Fix field references
-    list_filter = ("model_type", "is_deleted")  # Ensure `is_deleted` is correctly referenced
-    search_fields = ("name", "metadata")
-
-    def get_nmra_standard(self, obj):
-        """Ensure proper reference to NMRA Standard."""
-        return obj.nmra_standard.name if obj.nmra_standard else "N/A"
-    get_nmra_standard.short_description = "NMRA Standard"
-
-@admin.register(ExportedFile)
-class ExportedFileAdmin(admin.ModelAdmin):
-    list_display = ("id", "assembly", "file_name", "file_format", "generated_at")
-    search_fields = ("file_name", "assembly__name", "file_format")
-    list_filter = ("file_format", "generated_at")
-    readonly_fields = ("assembly", "file_name", "file_path", "file_format", "generated_at")
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-
-@admin.register(NMRAStandard)
-class NMRAStandardAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "scale_ratio", "gauge_mm", "rail_profile")
-    search_fields = ("name",)
-
+class AssemblyAdmin(MPTTModelAdmin):
+    """
+    Enables hierarchical view of assemblies in Django Admin.
+    """
+    list_display = ("name", "type", "parent")
+    search_fields = ("name", "type")
+    list_filter = ("type",)
+    ordering = ("name",)
 
 @admin.register(Parameter)
 class ParameterAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "parameter_type", "value")
-    list_filter = ("parameter_type",)
-    search_fields = ("name", "value")
+    """
+    Allows management of parameters.
+    """
+    list_display = ("assembly", "key", "value")
+    search_fields = ("key", "value")
+    list_filter = ("assembly",)
+
+@admin.register(ExportedFile)
+class ExportedFileAdmin(admin.ModelAdmin):
+    """
+    Enables viewing and downloading of exported CAD files.
+    """
+    list_display = ("component", "file_format", "created_at")
+    search_fields = ("component__name",)
+    list_filter = ("file_format", "created_at")

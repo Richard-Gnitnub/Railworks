@@ -1,0 +1,6 @@
+{% for param in parameters %}
+    <label for="{{ param.key }}">{{ param.key|title }}:</label>
+    <input type="text" name="{{ param.key }}" id="{{ param.key }}" value="{{ param.value }}">
+{% empty %}
+    <p>No parameters available for this structure.</p>
+{% endfor %}

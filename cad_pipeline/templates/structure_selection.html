@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structure Selection</title>
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+</head>
+<body>
+
+    <h2>Select a Structure to Build</h2>
+
+    <form>
+        <!-- Structure Selection -->
+        <label for="structure-type">Choose a Structure:</label>
+        <select name="structure-type" id="structure-type"
+                hx-get="/dynamic_form/" 
+                hx-target="#parameters" 
+                hx-trigger="change">
+            <option value="">-- Select --</option>
+            <option value="house">House</option>
+            <option value="wall">Wall</option>
+            <option value="fence">Fence</option>
+            <option value="track">Track</option>
+        </select>
+
+        <!-- Parameters (Dynamically Updated) -->
+        <div id="parameters">
+            <!-- Parameter fields will be loaded here via HTMX -->
+        </div>
+
+        <!-- File Format Selection -->
+        <label for="file-format">Export Format:</label>
+        <select name="file-format" id="file-format">
+            <option value="stl">STL</option>
+            <option value="step">STEP</option>
+        </select>
+
+        <!-- Generate Button -->
+        <button type="button" 
+                hx-get="/generate_model/" 
+                hx-include="[name='structure-type'], [name='file-format']"
+                hx-target="#preview"
+                hx-indicator="#loading">
+            Generate Model
+        </button>
+
+        <!-- Loading Indicator -->
+        <div id="loading" style="display: none;">Processing...</div>
+
+    </form>
+
+    <!-- Preview Area -->
+    <div id="preview">
+        <!-- The generated 3D model or response will be displayed here -->
+    </div>
+
+    <!-- Download Area -->
+    <div id="download">
+        <!-- Download link will be dynamically inserted here -->
+    </div>
+
+    <script>
+        document.body.addEventListener('htmx:afterRequest', function(event) {
+            const response = event.detail.xhr.responseText;
+            const jsonResponse = JSON.parse(response);
+            if (jsonResponse.download_url) {
+                document.getElementById("download").innerHTML = `
+                    <a href="${jsonResponse.download_url}" download>Download Model</a>
+                `;
+            }
+        });
+    </script>
+
+</body>
+</html>

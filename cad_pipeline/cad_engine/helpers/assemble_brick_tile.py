@@ -1,11 +1,11 @@
 import cadquery as cq
-from cad_engine.helpers.brick_geometry import (
+from cad_pipeline.cad_engine.helpers.brick_geometry import (
     create_full_brick_aligned, create_half_brick_aligned, config_to_tuple
 )
 
 def assemble_brick_tile(config):
     """
-    Assembles a brick tile based on the bond pattern defined in YAML.
+    Assembles a brick tile based on the bond pattern defined in Database.
     Supports: Flemish, Stretcher, Stack Bond.
     """
     config_tuple = config_to_tuple(config)  # ✅ Convert config into a proper tuple

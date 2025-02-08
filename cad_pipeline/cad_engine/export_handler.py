@@ -1,48 +1,35 @@
-import os
 import tempfile
 import shutil
 import cadquery as cq
-from django.conf import settings
+from django.core.cache import cache
 
-def export_tile(tile, config, version="v2.0", cache_results=False):
+def export_assembly_cached(assembly, config):
     """
-    Exports the tile to STEP and STL files using the YAML-defined file name.
+    Generic function to cache and export any assembly type (brick, tile, wall, etc.).
     """
     export_formats = config.get("export_formats", ["step", "stl"])
-    tile_type = config.get("tile_type", "bricks")  # Defaults to bricks if not specified
-    file_name = config.get("file_name", f"{tile_type}_tile")  # Uses default if not in YAML
+    tile_type = assembly.model_type  # Uses the assembly's model type
+    file_name = config.get("file_name", f"{tile_type}_export")  
 
-    output_dir = os.path.join(settings.MEDIA_ROOT, "cad_pipeline", "tiles", tile_type, f"v{version}")
-    os.makedirs(output_dir, exist_ok=True)
+    cache_key = f"assembly_export:{assembly.id}"
+    cached_files = cache.get(cache_key)
 
-    cache = {}
+    if cached_files:
+        return cached_files  # ✅ Return cached export if available
+
+    cache_files = {}
 
     for fmt in export_formats:
-        file_path = os.path.join(output_dir, f"{file_name}_{version}.{fmt}")  # 👈 Uses YAML file name
-
         try:
-            if fmt == "step":
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".step") as tmp_file:
-                    step_temp_path = tmp_file.name
-                cq.exporters.export(tile.toCompound(), step_temp_path)
-                shutil.move(step_temp_path, file_path)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{fmt}") as tmp_file:
+                temp_path = tmp_file.name
+            cq.exporters.export(assembly.toCompound(), temp_path)
 
-            elif fmt == "stl":
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".stl") as tmp_file:
-                    stl_temp_path = tmp_file.name
-                cq.exporters.export(tile.toCompound(), stl_temp_path)
-                shutil.move(stl_temp_path, file_path)
-
-            else:
-                raise ValueError(f"Unsupported export format: {fmt}")
-
-            print(f"✅ {fmt.upper()} file exported to: {file_path}")
-
-            if cache_results:
-                with open(file_path, "rb") as f:
-                    cache[fmt] = f.read()
+            with open(temp_path, "rb") as f:
+                cache_files[fmt] = f.read()
 
         except Exception as e:
             raise RuntimeError(f"❌ Export failed for format {fmt}: {e}")
 
-    return cache if cache_results else None
+    cache.set(cache_key, cache_files, timeout=86400)  # ✅ Cache export for fast access
+    return cache_files

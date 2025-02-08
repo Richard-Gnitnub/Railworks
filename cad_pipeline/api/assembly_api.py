@@ -24,7 +24,6 @@ def get_assembly(request, id: int):
     cache.set(cache_key, assembly, timeout=86400)
     return assembly
 
-
 # ✅ Retrieve All Assemblies (Optional Model Type Filtering)
 @router.get("/assemblies/", response={200: list[AssemblySchema]})
 def list_assemblies(request, model_type: str = None):
@@ -35,38 +34,28 @@ def list_assemblies(request, model_type: str = None):
     
     return query
 
+# ✅ Create or Overwrite an Assembly (Cache it Immediately)
+@router.post("/assemblies/", response={200: AssemblySchema, 201: AssemblySchema})
+def create_or_update_assembly(request, payload: AssemblySchema):
+    """Creates a new assembly or updates an existing one if the name already exists."""
+    data = payload.dict(exclude_unset=True)  # ✅ Prevents `id` from being passed
 
-# ✅ Create a New Assembly (Cache it Immediately)
-@router.post("/assembly/", response={201: AssemblySchema})
-def create_assembly(request, payload: AssemblySchema):
-    """Create a new assembly and cache it."""
-    assembly = Assembly.objects.create(**payload.dict())
+    # ✅ Check if an assembly with the same name exists
+    assembly, created = Assembly.objects.update_or_create(
+        name=data["name"],
+        defaults={
+            "model_type": data["model_type"],
+            "nmra_standard": data.get("nmra_standard"),
+            "metadata": data.get("metadata", {}),
+        },
+    )
 
-    # Store in cache immediately
+    # ✅ Invalidate and update cache
     cache_key = f"assembly:{assembly.id}"
-    cache.set(cache_key, assembly, timeout=86400)
-
-    return assembly
-
-
-# ✅ Update an Existing Assembly (Invalidate Cache)
-@router.put("/assembly/{id}/", response={200: AssemblySchema, 404: ErrorResponse})
-def update_assembly(request, id: int, payload: AssemblySchema):
-    """Update an existing assembly and refresh cache."""
-    assembly = get_object_or_404(Assembly, id=id)
-
-    # Update fields
-    for attr, value in payload.dict().items():
-        setattr(assembly, attr, value)
-    assembly.save()
-
-    # Invalidate and update cache
-    cache_key = f"assembly:{id}"
     cache.delete(cache_key)
     cache.set(cache_key, assembly, timeout=86400)
 
-    return assembly
-
+    return (201, assembly) if created else (200, assembly)  # 201 if new, 200 if updated
 
 # ✅ Soft Delete an Assembly (Invalidate Cache)
 @router.delete("/assembly/{id}/", response={204: None, 404: ErrorResponse})

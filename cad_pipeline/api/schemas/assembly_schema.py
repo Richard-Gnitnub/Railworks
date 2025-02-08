@@ -3,13 +3,12 @@ from typing import Optional, Dict
 from datetime import datetime
 
 class AssemblySchema(Schema):
-    """Defines the response structure for an Assembly object."""
-    id: int
     name: str
     model_type: str
-    nmra_standard_id: Optional[int]  # ForeignKey to NMRAStandard
-    metadata: Dict  # JSONField in Django
-    created_at: datetime
+    metadata: dict
+    nmra_standard_id: Optional[int] = None
+    created_at: Optional[datetime] = None  # Read-only
+    updated_at: Optional[datetime] = None  # Read-only
 
     class Config:
         json_schema_extra = {

@@ -19,7 +19,6 @@ class Assembly(MPTTModel):
             ("roof", "Roof")
         ]
     )
-
     parent = TreeForeignKey(
         'self',
         on_delete=models.CASCADE,
@@ -27,8 +26,7 @@ class Assembly(MPTTModel):
         blank=True,
         related_name='children'
     )
-
-    parameters = models.JSONField(default=dict)  # ✅ Add this field to store parameters dynamically
+    parameters = models.JSONField(default=dict)  # ✅ Store script parameters dynamically
 
     class MPTTMeta:
         order_insertion_by = ["name"]

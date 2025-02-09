@@ -34,22 +34,33 @@ def assemble_brick_tile(tile: Assembly, brick_parameters_list: list) -> cq.Workp
     # Assemble rows
     for i in range(row_repetition):
         print(f"\n🔹 DEBUG: Creating row {i + 1}/{row_repetition}")
-        x_offset = 0
+
+        row_x_offset = 0
+        if bond_pattern == "flemish" and i % 2 != 0:
+            row_x_offset = -brick_parameters_list[0]["brick_length"] / 1.5  # Align half-brick centre
+
+        x_offset = row_x_offset
         z_offset = i * brick_parameters_list[0]["brick_height"]
 
         for j in range(tile_width):
             brick_params = brick_parameters_list[j % len(brick_parameters_list)]
             print(f"🔸 DEBUG: Using brick {j + 1}/{tile_width} with parameters: {brick_params}")
 
-            # Create the appropriate brick model
+            # Create the appropriate brick model using `brick_geometry.py`
             if bond_pattern == "flemish":
                 brick_model = (
                     create_half_brick_aligned(**brick_params) if j % 2 else create_full_brick_aligned(**brick_params)
                 )
                 print(f"✅ Adding {'Half' if j % 2 else 'Full'} Brick at x_offset {x_offset}")
-            elif bond_pattern in ["stretcher", "stack"]:
+
+            elif bond_pattern == "stretcher":
                 brick_model = create_full_brick_aligned(**brick_params)
-                print(f"✅ Adding {'Full' if bond_pattern == 'stretcher' else 'Stacked'} Brick at x_offset {x_offset}")
+                print(f"✅ Adding Stretcher Bond Brick at x_offset {x_offset}")
+
+            elif bond_pattern == "stack":
+                brick_model = create_full_brick_aligned(**brick_params)
+                print(f"✅ Adding Stack Bond Brick at x_offset {x_offset}")
+
             else:
                 raise ValueError(f"❌ Unsupported bond pattern: {bond_pattern}")
 

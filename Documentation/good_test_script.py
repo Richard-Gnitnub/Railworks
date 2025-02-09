@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from cad_pipeline.models.assembly import Assembly
 from cad_pipeline.models.exported_file import ExportedFile
 from cad_pipeline.cad_engine.helpers.assemble_brick_tile import assemble_brick_tile
-from cad_pipeline.cad_engine.export_handler import export_assembly_cached
+from cad_pipeline.cad_engine.globals.export_handler import export_assembly_cached
 from ocp_vscode import show_object
 
 print("\n🚀 DEBUG: Starting Brick Tile Assembly & Export Test...\n")

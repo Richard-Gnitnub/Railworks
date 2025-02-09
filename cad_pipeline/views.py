@@ -4,7 +4,7 @@ from .models import Assembly, Parameter
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Assembly, Parameter
-from cad_pipeline.cad_engine.generate_component import generate_and_export_component
+from cad_pipeline.cad_engine.assemblies.generate_component import generate_and_export_component
 
 def structure_selection(request):
     """

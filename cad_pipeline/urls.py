@@ -1,9 +1,8 @@
-from django.contrib import admin
-from django.urls import path, include
-from cad_pipeline.api import api  # Import API entry point
+from django.urls import path
+from cad_pipeline.admin.admin_views import download_exported_file
+
+app_name = "cad_pipeline"
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("admin/", include("cad_pipeline.urls", namespace="cad_pipeline")),
-    path("api/", api.urls),
+    path("exported-file/<int:file_id>/download/", download_exported_file, name="exportedfile_download"),
 ]

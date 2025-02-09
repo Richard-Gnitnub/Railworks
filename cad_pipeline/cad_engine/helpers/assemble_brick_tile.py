@@ -1,58 +1,63 @@
+from cad_pipeline.models.assembly import Assembly
 import cadquery as cq
 from cad_pipeline.cad_engine.helpers.brick_geometry import (
-    create_full_brick_aligned, create_half_brick_aligned, config_to_tuple
+    create_full_brick_aligned, create_half_brick_aligned
 )
 
-def assemble_brick_tile(config):
+def assemble_brick_tile(tile: Assembly, brick_parameters_list: list) -> cq.Workplane:
     """
-    Assembles a brick tile based on the bond pattern defined in Database.
+    Assembles a brick tile using CadQuery's context solid behavior.
     Supports: Flemish, Stretcher, Stack Bond.
     """
-    config_tuple = config_to_tuple(config)  # ✅ Convert config into a proper tuple
-    bond_pattern = config.get("bond_pattern", "flemish")  # Default to Flemish
-    offset_X = config.get("offset_X", 0)
-    row_repetition = config["row_repetition"]
-    tile_width = config["tile_width"]
+    print("\n🔎 DEBUG: Starting `assemble_brick_tile` function...\n")
 
-    tile_assembly = cq.Assembly()
+    # Validate inputs
+    if not isinstance(tile, Assembly):
+        raise ValueError(f"❌ Expected an Assembly object for the tile, but got {type(tile)}")
+    if not isinstance(brick_parameters_list, list):
+        raise ValueError(f"❌ Expected a list of brick parameters, but got {type(brick_parameters_list)}")
+    if not brick_parameters_list:
+        raise ValueError("❌ Brick parameters list is empty. Ensure bricks are correctly assigned.")
 
+    # Retrieve tile parameters
+    tile_config = tile.parameters
+    bond_pattern = tile_config.get("bond_pattern", "flemish")
+    row_repetition = tile_config.get("row_repetition", 2)
+    tile_width = tile_config.get("tile_width", 4)
+
+    print(f"✅ Tile Configuration: {tile_config}")
+    print(f"✅ Bond Pattern: {bond_pattern}, Row Repetition: {row_repetition}, Tile Width: {tile_width}")
+
+    # Start with an empty Workplane
+    tile_workplane = cq.Workplane("XY")
+
+    # Assemble rows
     for i in range(row_repetition):
-        row_assembly = cq.Assembly()
-        
-        print(f"Debug: config_tuple type is {type(config_tuple)}")  # ✅ Debugging
-        assert isinstance(config_tuple, tuple), "config_tuple is not a tuple!"  # ✅ Debugging
-        
-        # ✅ Ensure we pass `config_tuple` as a **tuple**, not a list
-        half_brick = create_half_brick_aligned(config_tuple)
-        full_brick = create_full_brick_aligned(config_tuple)
-
-        row_x_offset = 0
-        if bond_pattern == "flemish" and i % 2 != 0:
-            row_x_offset = -config["brick_length"] / 1.5  # Align half-brick centre
-
-        x_offset = row_x_offset
+        print(f"\n🔹 DEBUG: Creating row {i + 1}/{row_repetition}")
+        x_offset = 0
+        z_offset = i * brick_parameters_list[0]["brick_height"]
 
         for j in range(tile_width):
+            brick_params = brick_parameters_list[j % len(brick_parameters_list)]
+            print(f"🔸 DEBUG: Using brick {j + 1}/{tile_width} with parameters: {brick_params}")
+
+            # Create the appropriate brick model
             if bond_pattern == "flemish":
-                if j % 2 == 0:  # 🔹 Add full brick
-                    row_assembly.add(full_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)))
-                    x_offset += config["brick_length"]
-                else:  # 🔹 Add half brick
-                    row_assembly.add(half_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)))
-                    x_offset += config["brick_length"] / 2
-
-            elif bond_pattern == "stretcher":
-                row_assembly.add(full_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)))
-                x_offset += config["brick_length"]  # Bricks are aligned in a running bond
-
-            elif bond_pattern == "stack":
-                row_assembly.add(full_brick, loc=cq.Location(cq.Vector(x_offset, 0, 0)))
-                x_offset += config["brick_length"]  # Each brick sits directly above the one below
-
+                brick_model = (
+                    create_half_brick_aligned(**brick_params) if j % 2 else create_full_brick_aligned(**brick_params)
+                )
+                print(f"✅ Adding {'Half' if j % 2 else 'Full'} Brick at x_offset {x_offset}")
+            elif bond_pattern in ["stretcher", "stack"]:
+                brick_model = create_full_brick_aligned(**brick_params)
+                print(f"✅ Adding {'Full' if bond_pattern == 'stretcher' else 'Stacked'} Brick at x_offset {x_offset}")
             else:
-                raise ValueError(f"Unsupported bond pattern: {bond_pattern}")
+                raise ValueError(f"❌ Unsupported bond pattern: {bond_pattern}")
 
-        z_offset = i * config["brick_height"]
-        tile_assembly.add(row_assembly, loc=cq.Location(cq.Vector(offset_X * i, 0, z_offset)))
+            # Use CadQuery's context solid behavior to combine bricks
+            tile_workplane = tile_workplane.union(brick_model.translate((x_offset, 0, z_offset)))
+            x_offset += brick_params["brick_length"] / (2 if j % 2 else 1)
 
-    return tile_assembly
+        print(f"🔹 Row {i + 1} completed at z_offset {z_offset}")
+
+    print("\n✅ DEBUG: Tile Assembly Completed!\n")
+    return tile_workplane

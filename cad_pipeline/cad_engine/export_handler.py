@@ -1,17 +1,17 @@
 import tempfile
-import shutil
 import cadquery as cq
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 
 def export_assembly_cached(assembly, config):
     """
-    Generic function to cache and export any assembly type (brick, tile, wall, etc.).
+    Exports a CadQuery Workplane and caches the result.
+    Now fully supports Workplane objects directly.
     """
     export_formats = config.get("export_formats", ["step", "stl"])
-    tile_type = assembly.model_type  # Uses the assembly's model type
-    file_name = config.get("file_name", f"{tile_type}_export")  
+    file_name = config.get("file_name", "cached_tile")  # ✅ No longer depends on `.model_type`
 
-    cache_key = f"assembly_export:{assembly.id}"
+    cache_key = f"assembly_export:{file_name.replace(' ', '_')}"  # ✅ Fix memcached error
     cached_files = cache.get(cache_key)
 
     if cached_files:
@@ -23,7 +23,12 @@ def export_assembly_cached(assembly, config):
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{fmt}") as tmp_file:
                 temp_path = tmp_file.name
-            cq.exporters.export(assembly.toCompound(), temp_path)
+            
+            # ✅ Fix: Ensure Workplane objects are exported correctly
+            if isinstance(assembly, cq.Workplane):
+                cq.exporters.export(assembly, temp_path)
+            else:
+                raise TypeError(f"❌ Invalid object type: {type(assembly)}. Expected `Workplane`.")
 
             with open(temp_path, "rb") as f:
                 cache_files[fmt] = f.read()

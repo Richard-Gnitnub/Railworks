@@ -29,10 +29,11 @@ class ExportedFileAdmin(admin.ModelAdmin):
     def download_link(self, obj):
         """
         Generates a secure download link for the exported file in Django Admin.
-        Uses the correct reverse function to avoid `NoReverseMatch`.
+        Adjust the URL namespace to match your project's URL configuration.
         """
         try:
-            url = reverse("admin:cad_pipeline_exportedfile_download", args=[obj.id])
+            # Update the reverse call to use the correct URL namespace.
+            url = reverse("cad_pipeline:exportedfile_download", args=[obj.id])
             return format_html('<a href="{}" download>⬇️ Download</a>', url)
         except Exception:
             return "⚠️ URL Not Found"
@@ -42,8 +43,10 @@ class ExportedFileAdmin(admin.ModelAdmin):
     def cache_status(self, obj):
         """
         Displays whether the file is currently cached.
+        Uses the same cache key as used in the caching functions.
         """
-        cached = is_cached(obj.file_name)  # ✅ Fixed function call (only 1 argument now)
+        cache_key = f"exported_file_{obj.id}"
+        cached = is_cached(cache_key)
         return format_html(
             '<span style="color:{};">{}</span>',
             "green" if cached else "red",

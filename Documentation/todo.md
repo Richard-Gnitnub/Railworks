@@ -1,7 +1,3 @@
-Here is the **comprehensive and updated TODO List** that includes all the latest changes to the project without any omissions:
-
----
-
 # **TODO List**
 
 ## **1. Project Setup**
@@ -23,7 +19,7 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
 - [x] Configured Django MPTT for hierarchical database relationships.  
 - [x] Replaced `parameter.py` with dynamic JSON fields in the database.  
 - [x] Removed `cache_manager.py` and integrated caching directly into export workflows.  
-- [x] Installed Memcached for efficient database caching.  
+- [x] Installed Django Database Cache for efficient caching.  
 
 ---
 
@@ -37,6 +33,7 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
 - [ ] Implement caching for intermediate solids (e.g., chairs, timbers) in the pipeline.  
 - [ ] Optimize the pipeline to minimize redundant computations (e.g., bounding box caching).  
 - [x] Integrated STEP and STL export functionalities via `export_handler.py`.  
+- [ ] Implement error handling and validation for STL/STEP exports.  
 
 ### **b. Database Integration**
 - [x] Defined and migrated initial database model for `Assembly` using Django MPTT.  
@@ -46,11 +43,12 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
 - [x] Extended database to support NMRA standards (`nmra_standards.py`).  
 - [ ] Extend models to include reusable components like chairs, timbers, and tracks.  
 - [ ] Enable the pipeline to query these models dynamically for parameter inputs.  
-- [ ] Log detailed metadata for each pipeline export (e.g., dimensions, file size).  
+- [ ] Log detailed metadata for each pipeline export (e.g., dimensions, file size, format).  
 
 ### **c. Admin Views**
 - [x] Created admin views for managing `Assembly` and `ExportedFile` models.  
 - [ ] Add admin views for managing NMRA standards and new component models.  
+- [ ] Improve UI/UX for admin panel interactions, including inline editing.  
 
 ### **d. Geometry and STL Export**
 - [x] Created the Flemish bond tile generation script with STEP/STL export.  
@@ -66,6 +64,7 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
 - [ ] Validate edge cases (e.g., missing or invalid parameters, circular dependencies).  
 - [ ] Test performance of caching mechanisms for intermediate solids and assemblies.  
 - [ ] Write integration tests for API endpoints (e.g., assembly creation, export workflows).  
+- [ ] Conduct load testing to evaluate system scalability.  
 
 ---
 
@@ -90,14 +89,50 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
 
 ## **6. Future Enhancements**
 - [x] Removed FastAPI-specific tasks and migrated to Django Ninja.  
-- [ ] Extend the pipeline to support advanced features (e.g., turnouts, curves).  
+- [ ] Extend the pipeline to support advanced features (e.g., turnouts, curves, multi-layer assemblies).  
 - [ ] Explore role-based access control (RBAC) for multi-user workflows.  
 - [ ] Introduce a visualization dashboard for assembly relationships using D3.js or similar.  
 - [ ] Implement robust error tracking and notifications (e.g., Sentry integration).  
+- [ ] Investigate front-end integration for parameter adjustments and live previews.  
 
 ---
 
-### **Short-Term Priorities**
+## **MVP Roadmap**
+
+### **MVP1: Core Pipeline & Basic Functionality**
+✅ Basic parametric model for brick tiles (Flemish bond).  
+✅ Integrated database-driven parameter storage.  
+✅ Established Django framework, admin panel, and API structure.  
+✅ Implemented STEP and STL export functionality.  
+
+### **MVP2: Brick/Tiling Expansion**
+- Additional bond patterns (Stretcher, English, Herringbone).  
+- Improved boundary handling (half-bricks, offsets, corners).  
+- Enhanced parametric control (mortar thickness, brick dimensions).  
+- Integration of cutouts (doors, windows).  
+- Improve caching strategy to store computed patterns for reuse.  
+
+### **MVP3: Advanced Geometry & UX Improvements**
+- Multi-layered/complex brick structures.  
+- Improved validation and logging for exports.  
+- Admin interface enhancements for parameter tuning.  
+- API refinements for more dynamic parameter handling.  
+
+### **MVP4: Async Tasks, Scalability, and Collaboration**
+- Celery/RQ integration for handling long-running CAD operations.  
+- Role-based access control for different user permissions.  
+- Optimisation for caching and performance at scale.  
+- Implement asynchronous processing of export tasks.  
+
+### **MVP5: Advanced Features & Visualisation**
+- Interactive 3D preview of brick patterns.  
+- Full-fledged parameter library for users to select presets.  
+- Expansion into additional architectural components and assemblies.  
+- Support for exporting additional file formats (e.g., OBJ, 3MF).  
+
+---
+
+## **Short-Term Priorities**
 1. **Database Integration**:
    - Extend models for chairs, timbers, and tracks.
    - Ensure the pipeline dynamically queries these models for its inputs.
@@ -113,6 +148,3 @@ Here is the **comprehensive and updated TODO List** that includes all the latest
    - Ensure caching improves performance without affecting functionality.
    - Validate assembly generation workflows with real-world scenarios.  
 
----
-
-This updated TODO list reflects all the changes, new additions, and refactoring efforts to date, ensuring no omissions and aligning with the project’s progress.

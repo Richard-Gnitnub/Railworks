@@ -27,18 +27,12 @@ class ExportedFileAdmin(admin.ModelAdmin):
     list_filter = ("file_format", "created_at")
 
     def download_link(self, obj):
-        """
-        Generates a secure download link for the exported file in Django Admin.
-        Adjust the URL namespace to match your project's URL configuration.
-        """
         try:
-            # Update the reverse call to use the correct URL namespace.
-            url = reverse("cad_pipeline:exportedfile_download", args=[obj.id])
+            url = reverse("cad_pipeline:exportedfile_download", args=[obj.id])  # Ensure correct namespace
             return format_html('<a href="{}" download>⬇️ Download</a>', url)
-        except Exception:
-            return "⚠️ URL Not Found"
+        except Exception as e:
+            return format_html('<span style="color:red;">⚠️ URL Error: {}</span>', str(e))
 
-    download_link.short_description = "Download"
 
     def cache_status(self, obj):
         """

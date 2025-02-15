@@ -1,54 +1,61 @@
-import logging
 import cadquery as cq
 from cad_pipeline.models.assembly import Assembly
 from cad_pipeline.cad_engine.helpers.tile_patterns.flemish_brick_tile_generator import generate_flemish_brick_tile
+from cad_pipeline.cad_engine.globals.export_handler import export_assembly
 from ocp_vscode import show_object
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
 def generate_flemish_wall():
     """
-    Generates a Flemish Bond Brick Wall by assembling multiple pre-generated tile segments.
+    Generates a Flemish brick wall by placing completed Flemish tiles into a grid.
+    The tile structure and pattern are pre-defined and retrieved from the database.
     """
-    logging.info("🚀 Starting Flemish Brick Wall Assembly...")
+    print("\n🚀 DEBUG: Starting Flemish Brick Wall Assembly...\n")
 
     # ✅ **Step 1: Retrieve Wall Parameters**
-    try:
-        wall_assembly = Assembly.objects.get(name="flemish_wall")
-    except Assembly.DoesNotExist:
-        logging.error("❌ ERROR: Flemish Wall MPTT node not found. Ensure database is set up correctly.")
-        return
+    wall_assembly = Assembly.objects.get(name="flemish_wall")
+    wall_parameters = wall_assembly.parameters
+    wall_width = wall_parameters["wall_width"]  # Number of tiles wide
+    wall_height = wall_parameters["wall_height"]  # Number of tiles tall
 
-    wall_params = wall_assembly.parameters
-    wall_width = wall_params.get("wall_width", 4)  # Number of tiles wide
-    wall_height = wall_params.get("wall_height", 3)  # Number of tiles high
+    print(f"✅ Wall Parameters: Width={wall_width} tiles, Height={wall_height} tiles")
 
-    logging.info(f"✅ Wall Parameters: Width={wall_width} tiles, Height={wall_height} tiles")
-
-    # ✅ **Step 2: Create an Empty Workplane for the Wall**
+    # ✅ **Step 2: Arrange Tiles in a Grid**
     wall_model = cq.Workplane("XY")
 
-    # ✅ **Step 3: Generate & Place Tiles into the Wall**
     for row in range(wall_height):
         for col in range(wall_width):
-            logging.info(f"🔹 Placing tile at Row {row + 1}, Column {col + 1}")
+            tile_instance = generate_flemish_brick_tile()  # Generate a fresh tile each time
 
-            # Generate a Flemish Brick Tile (already follows Flemish bond logic)
-            tile_model = generate_flemish_brick_tile()
+            # ✅ Compute X, Z positions dynamically (each tile occupies one cell)
+            x_offset = col
+            z_offset = row
 
-            if tile_model:
-                x_offset = col * 430  # Tile width (adjust if needed)
-                z_offset = row * 130  # Tile height (adjust if needed)
+            print(f"🔹 Placing tile at Row {row+1}, Column {col+1} at (X={x_offset}, Z={z_offset})")
 
-                logging.info(f"📏 Placing tile at (X={x_offset}, Z={z_offset})")
+            # ✅ Translate tile and add to the wall model
+            translated_tile = tile_instance.translate((x_offset, 0, z_offset))
+            wall_model = wall_model.union(translated_tile)
 
-                # Add tile to the wall at the correct position
-                wall_model = wall_model.union(tile_model.translate((x_offset, 0, z_offset)))
+    print("\n✅ Wall Assembly Completed!")
 
-    # ✅ **Step 4: Visualize the Assembled Wall**
-    logging.info("🎨 Displaying Flemish Wall in Viewer...")
+    # ✅ **Step 3: Export Wall**
+    try:
+        export_config = {
+            "export_formats": ["step", "stl"],
+            "file_name": "flemish_wall_export",
+            "component": wall_assembly
+        }
+        exported_files = export_assembly(wall_model, **export_config)
+
+        print("\n✅ Wall Export Completed!")
+        for fmt, file_data in exported_files.items():
+            print(f"   - Exported Format: {fmt.upper()}, Size: {len(file_data.file_data)} bytes")
+
+    except Exception as e:
+        raise RuntimeError(f"❌ Failed to export wall: {e}")
+
+    # ✅ **Step 4: Visualize Wall**
+    print("\n🎨 Displaying Flemish Wall in Viewer...\n")
     show_object(wall_model, name="Flemish Wall")
 
-    logging.info("✅ Flemish Wall Assembly Complete!")
-    return wall_model
+    print("\n✅ Test Complete!\n")

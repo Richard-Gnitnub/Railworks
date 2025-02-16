@@ -10,8 +10,8 @@ class Command(BaseCommand):
                 "name": "generate_flemish_brick_tile",
                 "type": "brick_tile",
                 "parameters": {
-                    "tile_width": 4,
-                    "row_repetition": 2,
+                    "tile_width": 8,
+                    "row_repetition": 8,
                     "bond_pattern": "flemish"
                 }
             }

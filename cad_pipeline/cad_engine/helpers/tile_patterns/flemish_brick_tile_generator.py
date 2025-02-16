@@ -28,7 +28,7 @@ def generate_flemish_brick_tile():
     # ✅ **Validate Required Parameters**
     tile_parameters = tile_assembly.parameters
     brick_parameters = brick_geometry.parameters
-    required_tile_params = ["tile_width", "row_repetition", "bond_pattern"]
+    required_tile_params = ["tile_width", "row_repetition", "bond_pattern", "alignment_factor"]
     required_brick_params = ["brick_length", "brick_width", "brick_height", "mortar_chamfer"]
 
     missing_tile_keys = [k for k in required_tile_params if k not in tile_parameters]

@@ -24,6 +24,7 @@ def assemble_brick_tile(tile: Assembly, brick_parameters_list: list) -> cq.Workp
     bond_pattern = tile_config.get("bond_pattern", "flemish")
     row_repetition = tile_config.get("row_repetition", 2)
     tile_width = tile_config.get("tile_width", 4)
+    alignment_factor = tile_config.get("alignment_factor", 1.5)
 
     print(f"✅ Tile Configuration: {tile_config}")
     print(f"✅ Bond Pattern: {bond_pattern}, Row Repetition: {row_repetition}, Tile Width: {tile_width}")
@@ -37,7 +38,7 @@ def assemble_brick_tile(tile: Assembly, brick_parameters_list: list) -> cq.Workp
 
         row_x_offset = 0
         if bond_pattern == "flemish" and i % 2 != 0:
-            row_x_offset = -brick_parameters_list[0]["brick_length"] / 1.5  # Align half-brick centre
+            row_x_offset = -brick_parameters_list[0]["brick_length"] / alignment_factor
 
         x_offset = row_x_offset
         z_offset = i * brick_parameters_list[0]["brick_height"]

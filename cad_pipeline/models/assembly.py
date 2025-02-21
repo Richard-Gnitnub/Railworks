@@ -16,7 +16,8 @@ class Assembly(MPTTModel):
             ("wall", "Wall"),
             ("building", "Building"),
             ("door", "Door"),
-            ("roof", "Roof")
+            ("roof", "Roof"),
+            ("building", "Building")
         ]
     )
     parent = TreeForeignKey(

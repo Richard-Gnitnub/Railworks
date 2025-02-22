@@ -1,32 +1,38 @@
-#!/usr/bin/env python3
-"""
-Global Filename Handler
------------------------
-This module centralizes file naming logic for the project.
-"""
+import re
 
-def clean_filename(file_name: str) -> str:
+def generate_export_filename(assembly_name, extension, user_defined_name=None):
     """
-    Standardizes file naming conventions:
-      - Removes "generate_" prefixes.
-      - Converts the name to lowercase.
-      - Replaces spaces with underscores.
-      - Prevents duplicate parent-child naming by returning the last component if present.
+    Generate a simplified export filename.
     
-    :param file_name: The original file name.
-    :return: The cleaned file name.
+    If a user-defined name is provided (and non-empty), it is used;
+    otherwise, the assembly_name is processed.
+    
+    Processing logic:
+      - If the assembly_name contains underscores (i.e. it's composite),
+        only the last component (the "leaf") is used.
+      - The base name is then sanitized by replacing whitespace with underscores
+        and removing any invalid characters.
+    
+    Parameters:
+        assembly_name (str): The full name of the assembly.
+        extension (str): The file extension (e.g. 'step', 'stl').
+        user_defined_name (Optional[str]): A custom filename defined by the user.
+    
+    Returns:
+        str: The generated filename.
     """
-    file_name = file_name.replace("generate_", "").replace(" ", "_").lower()
-    parts = file_name.split("_")
-    return parts[-1] if len(parts) > 1 else file_name
+    # Use the user-defined name if provided.
+    if user_defined_name and user_defined_name.strip():
+        base_name = user_defined_name.strip()
+    else:
+        # If the assembly_name contains underscores, take the last segment.
+        if '_' in assembly_name:
+            base_name = assembly_name.split('_')[-1]
+        else:
+            base_name = assembly_name
 
-def generate_export_filename(assembly_name: str, file_format: str) -> str:
-    """
-    Generates an export filename based on the assembly name and file format.
+    # Sanitize the base name.
+    base_name = re.sub(r'\s+', '_', base_name)
+    base_name = re.sub(r'[^\w\-_\.]', '', base_name)
     
-    :param assembly_name: The name of the assembly.
-    :param file_format: The file format extension (e.g., "step").
-    :return: A standardized export filename.
-    """
-    base_name = clean_filename(assembly_name)
-    return f"{base_name}.{file_format}"
+    return f"{base_name}.{extension}"

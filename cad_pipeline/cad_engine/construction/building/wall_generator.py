@@ -17,7 +17,7 @@ from cad_pipeline.cad_engine.helpers.cutouts import apply_cutouts
 from cad_pipeline.cad_engine.globals.filename_handler import generate_export_filename
 
 # Import the tile generator to auto-regenerate if needed
-from cad_pipeline.cad_engine.helpers.tile_patterns.flemish_brick_tile_generator import generate_flemish_brick_tile
+from cad_pipeline.cad_engine.construction.building.brick_tile_generator import generate_flemish_brick_tile
 
 # For metadata update of export timestamp
 from cad_pipeline.cad_engine.globals.metadata_handler import update_last_export

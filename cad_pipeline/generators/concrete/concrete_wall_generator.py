@@ -19,7 +19,7 @@ from cad_pipeline.cad_engine.globals.filename_handler import generate_export_fil
 from cad_pipeline.cad_engine.globals.metadata_handler import update_last_export
 
 # We'll import the tile generator function, which also expects an Assembly argument
-from cad_pipeline.cad_engine.construction.building.brick_tile_generator import generate_flemish_brick_tile
+from cad_pipeline.generators.concrete.concrete_brick_tile_generator import generate_flemish_brick_tile
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 

@@ -16,7 +16,7 @@ from cad_pipeline.cad_engine.helpers.transform_wall import transform_wall  # if 
 from cad_pipeline.cad_engine.globals.filename_handler import generate_export_filename
 
 # Import the wall generator to auto-regenerate if needed
-from cad_pipeline.cad_engine.construction.building.wall_generator import generate_flemish_wall
+from cad_pipeline.generators.concrete.concrete_wall_generator import generate_flemish_wall
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 

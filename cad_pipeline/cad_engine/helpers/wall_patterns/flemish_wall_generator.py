@@ -19,6 +19,9 @@ from cad_pipeline.cad_engine.globals.filename_handler import generate_export_fil
 # Import the tile generator to auto-regenerate if needed
 from cad_pipeline.cad_engine.helpers.tile_patterns.flemish_brick_tile_generator import generate_flemish_brick_tile
 
+# For metadata update of export timestamp
+from cad_pipeline.cad_engine.globals.metadata_handler import update_last_export
+
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
 def generate_flemish_wall():
@@ -32,25 +35,20 @@ def generate_flemish_wall():
     """
     logging.info("🚀 Starting Flemish Brick Wall Generation...")
 
-    # 1. Retrieve the wall assembly (should be pre-created in the DB)
     wall_assembly = retrieve_assembly("flemish_wall_generator")
     if not wall_assembly:
         return None
 
-    # 2. Calculate wall dimensions dynamically.
     dimensions = calculate_wall_dimensions()
     if dimensions is None:
         logging.error("❌ Failed to calculate wall dimensions.")
         return None
-    # Dimensions are now stored in the wall assembly metadata by the helper.
     logging.info(f"Calculated dimensions: {dimensions}")
 
-    # 3. Import the cached tile assembly from which the wall is built.
     tile_model = import_tile_assembly(wall_assembly)
     if tile_model is None:
         return None
 
-    # 4. Retrieve manual cutouts from the assembly parameters (if any)
     manual_cutouts = wall_assembly.parameters.get("cutouts", [])
     if not manual_cutouts:
         logging.warning("⚠️ No manual cutouts defined; proceeding without cutouts.")
@@ -59,10 +57,8 @@ def generate_flemish_wall():
     if wall_with_cutouts is None:
         return None
 
-    # 5. Export the final wall model.
     export_flemish_wall(wall_with_cutouts, wall_assembly)
 
-    # 6. Display the wall in the viewer.
     logging.info("🎨 Displaying Flemish Wall in Viewer...")
     show_object(wall_with_cutouts, name="Flemish Wall")
 
@@ -89,9 +85,7 @@ def import_tile_assembly(wall_assembly):
     The filename is generated using the global filename handler to ensure consistency.
     """
     tile_assembly_name = "flemish_brick_tile_generator"
-    # Compose a filename like "flemish_wall_generator_flemish_brick_tile_generator.step"
     tile_file_name = generate_export_filename(f"{wall_assembly.name}_{tile_assembly_name}", "step")
-
     logging.info(f"🔄 Attempting to import '{tile_file_name}' from cache...")
 
     try:
@@ -126,7 +120,7 @@ def export_flemish_wall(wall_model, wall_assembly):
     Exports the Flemish Brick Wall using the global export handler.
     
     The filename is generated dynamically from the wall assembly.
-    After exporting, metadata is updated with the export timestamp.
+    After exporting, the export timestamp is updated in the metadata.
     """
     try:
         export_config = {
@@ -134,14 +128,11 @@ def export_flemish_wall(wall_model, wall_assembly):
             "component": wall_assembly
         }
         exported_files = export_assembly(wall_model, **export_config)
-
         logging.info("✅ Wall Export Completed!")
         for fmt, file_data in exported_files.items():
             logging.info(f"   - Exported Format: {fmt.upper()}, Size: {len(file_data.file_data)} bytes")
 
-        # Update metadata with export timestamp
-        from cad_pipeline.cad_engine.globals.metadata_handler import update_assembly_metadata
-        update_assembly_metadata(wall_assembly.name, {"last_export": datetime.now().isoformat()})
+        update_last_export(wall_assembly.name, datetime.now().isoformat())
     except Exception as e:
         logging.error(f"❌ ERROR: Failed to export wall: {e}")
 

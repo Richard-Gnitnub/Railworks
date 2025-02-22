@@ -21,8 +21,27 @@ def export_assembly(assembly, export_formats=["step", "stl"], component=None):
         logging.error("❌ ERROR: `export_assembly()` requires a component to determine filename.")
         raise ValueError("`export_assembly()` requires a component.")
     
-    # Use the global filename handler to generate a standardized filename for each format.
-    file_name = generate_export_filename(component.name, "")[:-1]  # We'll append the format below.
+    # Check for a custom export filename in the component parameters.
+    custom_export = None
+    if hasattr(component, "parameters"):
+        custom_export = component.parameters.get("export_filename", None)
+    
+    # If no custom export filename is provided, derive a concise default
+    # by extracting the last few segments of the component's name.
+    if not custom_export:
+        segments = component.name.split('_')
+        if len(segments) >= 3:
+            custom_export = "_".join(segments[-3:])
+        elif len(segments) >= 1:
+            custom_export = segments[-1]
+        else:
+            custom_export = component.name
+
+    # Generate a base filename using the custom export name.
+    # (We pass the custom_export as both the default and the user_defined_name.)
+    file_name = generate_export_filename(custom_export, "", user_defined_name=custom_export)
+    if file_name.endswith('.'):
+        file_name = file_name[:-1]
     logging.info(f"🚀 Cleaning filename: Using standardized base name `{file_name}` derived from `{component.name}`")
 
     exported_files = {}

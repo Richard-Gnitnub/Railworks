@@ -7,7 +7,6 @@ from cad_pipeline.cad_engine.helpers.calculate_wall_dimensions import calculate_
 from cad_pipeline.cad_engine.helpers.cutouts import apply_cutouts
 from cad_pipeline.generators.generator_strategy import IGenerator
 from cad_pipeline.generators.concrete.concrete_brick_tile_generator import FlemishBrickTileGenerator
-from cad_pipeline.cad_engine.globals.error_handler import log_error
 
 class FlemishWallGenerator(IGenerator):
     def generate(self, wall_assembly: Assembly):
@@ -19,21 +18,21 @@ class FlemishWallGenerator(IGenerator):
         # Calculate wall dimensions.
         dimensions = calculate_wall_dimensions()
         if dimensions is None:
-            log_error("❌ Failed to calculate wall dimensions")
+            logging.error("❌ Failed to calculate wall dimensions.")
             return None
         logging.info(f"Calculated dimensions: {dimensions}")
 
         # Generate the tile assembly required for the wall.
         tile_model = self.generate_tile_assembly(wall_assembly)
         if tile_model is None:
-            log_error("❌ Failed to generate tile assembly")
+            logging.error("❌ Failed to generate tile assembly.")
             return None
 
         # Retrieve manual cutouts from wall parameters.
         manual_cutouts = wall_assembly.parameters.get("cutouts", [])
         wall_with_cutouts = self.apply_wall_cutouts(tile_model, manual_cutouts)
         if wall_with_cutouts is None:
-            log_error("❌ Failed to apply cutouts to wall")
+            logging.error("❌ Failed to apply cutouts to wall.")
             return None
 
         # Export the newly generated wall.
@@ -54,13 +53,13 @@ class FlemishWallGenerator(IGenerator):
             from cad_pipeline.models import Assembly
             tile_assembly = Assembly.objects.get(name=tile_assembly_name)
         except Assembly.DoesNotExist:
-            log_error(f"❌ Tile assembly '{tile_assembly_name}' not found in DB")
+            logging.error(f"❌ Tile assembly '{tile_assembly_name}' not found in DB.")
             return None
 
         generator = FlemishBrickTileGenerator()
         tile_model = generator.generate(tile_assembly)
         if tile_model is None:
-            log_error("❌ ERROR: Failed to generate tile model")
+            logging.error("❌ ERROR: Failed to generate tile model.")
             return None
         logging.info("✅ Successfully generated tile model.")
         return tile_model
@@ -73,7 +72,7 @@ class FlemishWallGenerator(IGenerator):
             logging.info("🛠 Applying manual cutouts to the wall...")
             return apply_cutouts(tile_model, cutouts)
         except Exception as e:
-            log_error("❌ ERROR: Failed to apply cutouts", e)
+            logging.error(f"❌ ERROR: Failed to apply cutouts: {e}")
             return None
 
     def export_flemish_wall(self, wall_model: cq.Workplane, wall_assembly: Assembly):
@@ -88,6 +87,7 @@ class FlemishWallGenerator(IGenerator):
             exported_files = export_assembly(wall_model, **export_config)
             logging.info("✅ Wall Export Completed!")
             for fmt, exported_file in exported_files.items():
+                # Use the file_data attribute of the ExportedFile to determine size.
                 logging.info(f"   - Exported Format: {fmt.upper()}, Size: {len(exported_file.file_data)} bytes")
         except Exception as e:
-            log_error("❌ ERROR: Failed to export wall", e)
+            logging.error(f"❌ ERROR: Failed to export wall: {e}")

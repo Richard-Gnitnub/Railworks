@@ -1,7 +1,7 @@
 import logging
+from datetime import datetime
 from cad_pipeline.models.assembly import Assembly
 from cad_pipeline.cad_engine.globals.metadata_handler import update_computed_dimensions
-from cad_pipeline.cad_engine.globals.error_handler import log_error
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
@@ -37,7 +37,7 @@ def calculate_wall_dimensions() -> dict:
         tile_assembly  = Assembly.objects.get(name="flemish_brick_tile_generator")
         logging.info("Retrieved tile generator assembly.")
     except Exception as e:
-        log_error("Error retrieving assemblies", e)
+        logging.error(f"Error retrieving assemblies: {e}")
         return None
 
     brick_params = brick_assembly.parameters
@@ -51,7 +51,7 @@ def calculate_wall_dimensions() -> dict:
         bond_pattern   = tile_params.get("bond_pattern", "default").lower()
         logging.info("Retrieved all necessary parameters for calculation.")
     except KeyError as e:
-        log_error("Missing required parameter", e)
+        logging.error(f"Missing required parameter: {e}")
         return None
 
     # Calculate wall width based on the bond pattern.
@@ -79,7 +79,7 @@ def calculate_wall_dimensions() -> dict:
     if update_computed_dimensions("flemish_wall_generator", dimensions):
         logging.info("Computed dimensions updated successfully in metadata.")
     else:
-        log_error("Failed to update computed dimensions in metadata")
+        logging.error("Failed to update computed dimensions in metadata.")
 
     logging.info("✅ Wall dimension calculation completed.")
     return dimensions

@@ -1,8 +1,6 @@
 import cadquery as cq
 import logging
-from cad_pipeline.cad_engine.globals.error_handler import log_error
 
-# Optionally remove or adjust basicConfig if logging is already configured globally.
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 def create_cutout_shape(width: float, height: float, depth: float) -> cq.Workplane:
@@ -42,7 +40,7 @@ def apply_cutouts(wall: cq.Workplane, cutouts: list) -> cq.Workplane:
             shape = create_cutout_shape(width, height, depth)
             wall = wall.cut(shape.translate((x, 0, z)))
         except KeyError as e:
-            log_error("❌ ERROR: Missing required key in cutout definition", e)
+            logging.error(f"❌ ERROR: Missing required key in cutout definition: {e}")
             continue
 
     logging.info("✅ All cutouts applied successfully.")

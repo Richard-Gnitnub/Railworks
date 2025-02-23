@@ -9,7 +9,6 @@ from cad_pipeline.cad_engine.helpers.replicate_corner import replicate_corner_by
 from cad_pipeline.cad_engine.helpers.transform_wall import transform_wall
 from cad_pipeline.generators.generator_strategy import IGenerator
 from cad_pipeline.generators.concrete.concrete_wall_generator import FlemishWallGenerator
-from cad_pipeline.cad_engine.globals.error_handler import log_error
 
 class FlemishBuildingGenerator(IGenerator):
     def generate(self, building_assembly: Assembly):
@@ -21,7 +20,7 @@ class FlemishBuildingGenerator(IGenerator):
         # Retrieve the building assembly.
         building_assembly = self.retrieve_assembly("flemish_building_generator")
         if not building_assembly:
-            log_error("❌ Building assembly not found.")
+            logging.error("❌ Building assembly not found.")
             return None
 
         # Retrieve dynamic parameters.
@@ -32,20 +31,20 @@ class FlemishBuildingGenerator(IGenerator):
             replication_translation = params["replication_translation"]
             assemble_mode = params["assemble_mode"]
         except KeyError as e:
-            log_error("❌ Missing required parameter", e)
+            logging.error(f"❌ Missing required parameter: {e}")
             return None
 
         # Retrieve the wall assembly.
         child_wall_assembly = self.retrieve_assembly("flemish_wall_generator")
         if not child_wall_assembly:
-            log_error("❌ Child wall assembly 'flemish_wall_generator' not found.")
+            logging.error("❌ Child wall assembly 'flemish_wall_generator' not found.")
             return None
 
         # Directly generate the wall using its generator.
         wall_generator = FlemishWallGenerator()
         child_wall = wall_generator.generate(child_wall_assembly)
         if child_wall is None:
-            log_error("❌ Failed to generate wall solid")
+            logging.error("❌ Failed to generate wall solid.")
             return None
 
         # Derive front and left wall solids.
@@ -81,7 +80,7 @@ class FlemishBuildingGenerator(IGenerator):
             from cad_pipeline.models.assembly import Assembly
             return Assembly.objects.get(name=name)
         except Assembly.DoesNotExist:
-            log_error(f"❌ ERROR: Assembly '{name}' not found in the database.")
+            logging.error(f"❌ ERROR: Assembly '{name}' not found in the database.")
             return None
 
     def export_flemish_building(self, building_model: cq.Workplane, building_assembly: Assembly):
@@ -98,4 +97,4 @@ class FlemishBuildingGenerator(IGenerator):
             for fmt, file_data in exported_files.items():
                 logging.info(f"   - Exported Format: {fmt.upper()}, Size: {len(file_data.file_data)} bytes")
         except Exception as e:
-            log_error("❌ ERROR: Failed to export building", e)
+            logging.error(f"❌ ERROR: Failed to export building: {e}")

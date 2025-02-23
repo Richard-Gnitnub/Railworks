@@ -86,7 +86,8 @@ class FlemishWallGenerator(IGenerator):
             }
             exported_files = export_assembly(wall_model, **export_config)
             logging.info("✅ Wall Export Completed!")
-            for fmt, file_data in exported_files.items():
-                logging.info(f"   - Exported Format: {fmt.upper()}, Size: {len(file_data)} bytes")
+            for fmt, exported_file in exported_files.items():
+                # Use the file_data attribute of the ExportedFile to determine size.
+                logging.info(f"   - Exported Format: {fmt.upper()}, Size: {len(exported_file.file_data)} bytes")
         except Exception as e:
             logging.error(f"❌ ERROR: Failed to export wall: {e}")

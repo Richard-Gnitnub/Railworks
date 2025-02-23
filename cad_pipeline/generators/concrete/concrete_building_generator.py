@@ -3,7 +3,6 @@ import cadquery as cq
 from ocp_vscode import show_object
 from cad_pipeline.models.assembly import Assembly
 from cad_pipeline.cad_engine.globals.export_handler import export_assembly
-from cad_pipeline.cad_engine.globals.filename_handler import generate_export_filename
 from cad_pipeline.cad_engine.helpers.building_corner import create_corner_from_walls
 from cad_pipeline.cad_engine.helpers.replicate_corner import replicate_corner_by_mirror
 from cad_pipeline.cad_engine.helpers.transform_wall import transform_wall

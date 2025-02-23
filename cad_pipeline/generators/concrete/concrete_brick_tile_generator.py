@@ -5,6 +5,7 @@ from cad_pipeline.cad_engine.helpers.assemble_brick_tile import assemble_brick_t
 from cad_pipeline.cad_engine.globals.export_handler import export_assembly
 from ocp_vscode import show_object
 from cad_pipeline.generators.generator_strategy import IGenerator
+from cad_pipeline.cad_engine.globals.error_handler import log_error
 
 class FlemishBrickTileGenerator(IGenerator):
     def generate(self, assembly: Assembly):
@@ -27,7 +28,7 @@ class FlemishBrickTileGenerator(IGenerator):
             brick_params = brick_geometry.parameters
             logging.info("Retrieved brick geometry assembly.")
         except Exception as e:
-            logging.error(f"ERROR: Database lookup failed: {e}")
+            log_error("ERROR: Database lookup failed", e)
             return None
 
         # Validate required parameters.
@@ -38,7 +39,7 @@ class FlemishBrickTileGenerator(IGenerator):
         missing_brick_keys = [k for k in required_brick_params if k not in brick_params]
 
         if missing_tile_keys or missing_brick_keys:
-            logging.error(f"ERROR: Missing required parameters: {missing_tile_keys + missing_brick_keys}")
+            log_error(f"ERROR: Missing required parameters: {missing_tile_keys + missing_brick_keys}")
             return None
 
         logging.info(f"Tile Parameters: {tile_params}")
@@ -48,11 +49,11 @@ class FlemishBrickTileGenerator(IGenerator):
         try:
             tile_model = assemble_brick_tile(assembly, [brick_params])
             if tile_model is None:
-                logging.error("ERROR: assemble_brick_tile() returned None! Check input parameters.")
+                log_error("ERROR: assemble_brick_tile() returned None! Check input parameters")
                 return None
             logging.info("Tile Assembly Completed.")
         except Exception as e:
-            logging.error(f"ERROR: Failed to assemble brick tile: {e}")
+            log_error("ERROR: Failed to assemble brick tile", e)
             return None
 
         # Export the assembled tile using the global export handler.
@@ -60,7 +61,7 @@ class FlemishBrickTileGenerator(IGenerator):
             export_assembly(tile_model, component=assembly)
             logging.info("Tile Export Completed!")
         except Exception as e:
-            logging.error(f"ERROR: Failed to export tile: {e}")
+            log_error("ERROR: Failed to export tile", e)
             return None
 
         # Visualise the tile in the 3D viewer.

@@ -4,9 +4,8 @@ import os
 import tempfile
 from cad_pipeline.models.exported_file import ExportedFile
 
-# ✅ Configure Logging
+# Configure Logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
 
 def import_step_subassembly(file_name: str, generator_function=None):
     """
@@ -19,7 +18,7 @@ def import_step_subassembly(file_name: str, generator_function=None):
     """
     logging.info(f"🔍 Checking for existing STEP file: `{file_name}`")
 
-    # ✅ Check if the file exists in the database
+    # Check if the file exists in the database
     step_file = (
         ExportedFile.objects
         .filter(file_name=file_name, file_format="step")
@@ -29,32 +28,28 @@ def import_step_subassembly(file_name: str, generator_function=None):
 
     if step_file:
         logging.info(f"✅ Found existing STEP file: `{file_name}`, attempting import...")
-
-        # ✅ Write binary data to a temp file before importing
         temp_file_path = None
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".step") as temp_file:
                 temp_file.write(step_file.file_data)
-                temp_file_path = temp_file.name  # Get the temp file path
-
+                temp_file_path = temp_file.name
             logging.info(f"📂 STEP file saved temporarily at `{temp_file_path}`")
 
-            # ✅ Import from the temp file
+            # Import the STEP file into a CadQuery Workplane
             model = cq.importers.importStep(temp_file_path)
             logging.info(f"✅ Successfully imported `{file_name}` into CadQuery.")
-
             return model
 
         except Exception as e:
             logging.warning(f"⚠️ Corrupted STEP file detected for `{file_name}`: {e}")
 
         finally:
-            # ✅ Ensure temp file is deleted even if an error occurs
+            # Ensure the temporary file is removed
             if temp_file_path and os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
                 logging.info(f"🧹 Temporary file `{temp_file_path}` deleted.")
 
-    # ✅ Trigger regeneration if file is missing or invalid
+    # If we reach here, the cached file doesn't exist or is invalid.
     logging.warning(f"⚠️ STEP file `{file_name}` not found or invalid. Attempting regeneration...")
 
     if generator_function:
@@ -70,5 +65,5 @@ def import_step_subassembly(file_name: str, generator_function=None):
             logging.error(f"❌ ERROR: Exception during regeneration of `{file_name}`: {e}")
             return None
     else:
-        logging.error(f"❌ ERROR: No generator function provided. Cannot proceed.")
+        logging.error("❌ ERROR: No generator function provided. Cannot proceed.")
         return None

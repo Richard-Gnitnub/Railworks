@@ -2,8 +2,6 @@ import logging
 import tempfile
 import cadquery as cq
 from cad_pipeline.models.exported_file import ExportedFile
-
-# Import the global filename handler
 from cad_pipeline.cad_engine.globals.filename_handler import generate_export_filename
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
@@ -20,29 +18,23 @@ def export_assembly(assembly, export_formats=["step", "stl"], component=None):
     if component is None:
         logging.error("❌ ERROR: `export_assembly()` requires a component to determine filename.")
         raise ValueError("`export_assembly()` requires a component.")
-    
-    # Check for a custom export filename in the component parameters.
-    custom_export = None
-    if hasattr(component, "parameters"):
-        custom_export = component.parameters.get("export_filename", None)
-    
-    # If no custom export filename is provided, derive a concise default
-    # by extracting the last few segments of the component's name.
-    if not custom_export:
-        segments = component.name.split('_')
-        if len(segments) >= 3:
-            custom_export = "_".join(segments[-3:])
-        elif len(segments) >= 1:
-            custom_export = segments[-1]
-        else:
-            custom_export = component.name
 
-    # Generate a base filename using the custom export name.
-    # (We pass the custom_export as both the default and the user_defined_name.)
-    file_name = generate_export_filename(custom_export, "", user_defined_name=custom_export)
-    if file_name.endswith('.'):
-        file_name = file_name[:-1]
-    logging.info(f"🚀 Cleaning filename: Using standardized base name `{file_name}` derived from `{component.name}`")
+    logging.debug(f"Export Handler: Processing component `{component.name}` with parameters: {getattr(component, 'parameters', {})}")
+
+    # Always prioritize the user-defined filename if available
+    custom_export = component.parameters.get("export_filename") if hasattr(component, "parameters") else None
+
+    if not custom_export:
+        logging.warning(f"⚠️ No custom filename found in component parameters. Deriving a name from `{component.name}`.")
+        segments = component.name.split('_')
+        custom_export = "_".join(segments[-3:]) if len(segments) >= 3 else segments[-1]
+
+    logging.debug(f"Export Handler: Using `{custom_export}` as the base filename before formatting.")
+
+    # Generate the filename using the custom name
+    file_name = generate_export_filename(custom_export, "", user_defined_name=custom_export).strip('.')
+    
+    logging.info(f"🚀 Final export filename: `{file_name}`")
 
     exported_files = {}
 

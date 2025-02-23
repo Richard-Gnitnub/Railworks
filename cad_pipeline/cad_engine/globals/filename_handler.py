@@ -1,41 +1,45 @@
 import re
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
 def generate_export_filename(assembly_name, extension, user_defined_name=None):
     """
     Generate a simplified export filename.
     
-    If a user-defined name is provided (and non-empty), it is used;
-    otherwise, the assembly_name is processed.
-    
+    If a user-defined name is provided, it takes priority.
+    Otherwise, the assembly_name is processed to extract a concise filename.
+
     Processing logic:
-      - If the assembly_name contains underscores, only the last few segments are used.
-      - Specifically, if there are 3 or more underscores, the last three segments are used;
-        if there are fewer, the last segment is used.
-      - The base name is then sanitized by replacing whitespace with underscores
-        and removing any invalid characters.
-    
+      - If `user_defined_name` exists, use it directly.
+      - If `assembly_name` contains underscores, extract only the last few segments.
+      - If no underscores exist, use the full `assembly_name`.
+      - Finally, sanitize the filename to remove any invalid characters.
+
     Parameters:
-        assembly_name (str): The full name or custom name for the assembly.
+        assembly_name (str): The full name of the assembly.
         extension (str): The file extension (e.g. 'step', 'stl').
         user_defined_name (Optional[str]): A custom filename defined by the user.
-    
+
     Returns:
         str: The generated filename.
     """
-    # Use the user-defined name if provided.
+    logging.debug(f"Filename Handler: Received assembly_name='{assembly_name}', extension='{extension}', user_defined_name='{user_defined_name}'")
+
+    # Prioritize user-defined filename
     if user_defined_name and user_defined_name.strip():
         base_name = user_defined_name.strip()
+        logging.debug(f"Filename Handler: Using user-defined name `{base_name}`")
     else:
         segments = assembly_name.split('_')
-        if len(segments) >= 3:
-            base_name = "_".join(segments[-3:])
-        elif len(segments) >= 1:
-            base_name = segments[-1]
-        else:
-            base_name = assembly_name
+        base_name = "_".join(segments[-3:]) if len(segments) >= 3 else segments[-1]
+        logging.debug(f"Filename Handler: Derived name `{base_name}` from assembly_name `{assembly_name}`")
 
-    # Sanitize the base name.
+    # Sanitize the base name
     base_name = re.sub(r'\s+', '_', base_name)
     base_name = re.sub(r'[^\w\-_\.]', '', base_name)
+
+    final_filename = f"{base_name}.{extension}".strip('.')
+    logging.debug(f"Filename Handler: Returning filename `{final_filename}`")
     
-    return f"{base_name}.{extension}"
+    return final_filename

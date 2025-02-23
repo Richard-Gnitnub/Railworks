@@ -20,11 +20,15 @@ class ExportedFile(models.Model):
     @classmethod
     def generate_filename(cls, component, file_format):
         """
-        Generates a dynamic filename based on the component's MPTT hierarchy.
-        Example: "brick_geometry_generate_flemish_brick_tile.step"
+        Generates a **clean** filename, using:
+        - `export_filename` from parameters (if defined)
+        - Component name (fallback)
         """
-        hierarchy_path = "_".join(component.get_ancestors(include_self=True).values_list("name", flat=True))
-        return f"{hierarchy_path.lower().replace(' ', '_')}.{file_format}"
+        # ✅ Use export_filename if available
+        custom_name = component.parameters.get("export_filename") if hasattr(component, "parameters") else None
+        file_name = custom_name or component.name.lower().replace(" ", "_")  # Fallback to component name
+
+        return f"{file_name}.{file_format}"  # ✅ Clean and readable!
 
     @classmethod
     def store_exported_file(cls, component, file_format, file_data):
@@ -32,7 +36,7 @@ class ExportedFile(models.Model):
         Stores an exported CAD file **in the database**.
         Calls `cache_manager` to handle caching.
         """
-        file_name = cls.generate_filename(component, file_format)
+        file_name = cls.generate_filename(component, file_format)  # ✅ Uses the fixed filename logic
 
         # ✅ Store in the database
         exported_file, created = cls.objects.update_or_create(
